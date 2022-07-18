@@ -12,22 +12,23 @@ const rinkebySigner = new ethers.Wallet(
 );
 
 const responseContract = new ethers.Contract(
-  "0x6A3efF8066dF9580685405DE5C8278e572A4b451",
+  "0x650823E9A407d3E012514BB876813a84445518bd",
   genericLargeResponse_abi,
   rinkebySigner
 );
 
 const test = async () => {
-  let data = await responseContract.data();
+  let data = await responseContract.parking_spot_location();
 
   console.log(`Data is: ${data}`);
+  // console.log(rinkebySigner.address);
 
-  let tx = await responseContract.requestBytes({
-    gasLimit: 2100000,
-    gasPrice: 8000000000,
-  });
+  // let tx = await responseContract.requestOffchainParkingSpotData({
+  //   gasLimit: 2100000,
+  //   gasPrice: 8000000000,
+  // });
 
-  data = await responseContract.data();
+  // data = await responseContract.data();
 
   console.log(`Data is: ${data}`);
 };
