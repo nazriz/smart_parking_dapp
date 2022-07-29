@@ -7,7 +7,7 @@ const genericLargeResponse_abi = require("../ABI/GenericLargeResponse_abi.json")
 const rinkebyProvider = ethers.getDefaultProvider("rinkeby");
 
 const rinkebySigner = new ethers.Wallet(
-  process.env.PRIVATE_KEY,
+  process.env.DEMO_PRIVATE_KEY,
   rinkebyProvider
 );
 
@@ -21,14 +21,14 @@ const test = async () => {
   let data = await responseContract.parking_spot_location();
 
   console.log(`Data is: ${data}`);
-  // console.log(rinkebySigner.address);
+  console.log(rinkebySigner.address);
 
   // let tx = await responseContract.requestOffchainParkingSpotData({
   //   gasLimit: 2100000,
   //   gasPrice: 8000000000,
   // });
 
-  // data = await responseContract.data();
+  data = await responseContract.data();
 
   console.log(`Data is: ${data}`);
 };

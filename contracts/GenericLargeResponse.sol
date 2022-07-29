@@ -24,7 +24,7 @@ contract GenericLargeResponse is ChainlinkClient, ConfirmedOwner {
 
 
     function requestOffchainParkingSpotData() public {
-        string memory sender_address = Strings.toHexString(uint256(uint160(msg.sender)), 20);
+        string memory sender_address = Strings.toHexString(uint160(msg.sender), 20);
         Chainlink.Request memory req = buildChainlinkRequest(jobId, address(this), this.fulfillBytes.selector);
         string memory api_url = "https://yfkocaqzu8.execute-api.us-east-1.amazonaws.com/test/register?address=";
         string memory url = string.concat(api_url,sender_address);
@@ -49,4 +49,5 @@ contract GenericLargeResponse is ChainlinkClient, ConfirmedOwner {
         require(link.transfer(msg.sender, link.balanceOf(address(this))), 'Unable to transfer');
     }
 }
+
 
