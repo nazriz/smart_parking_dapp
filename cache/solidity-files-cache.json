@@ -1680,6 +1680,42 @@
       "artifacts": [
         "Counters"
       ]
+    },
+    "/Users/nazimrizvic/smart_parking_dapp/contracts/ParkingSpotAttributes.sol": {
+      "lastModificationDate": 1659062118971,
+      "contentHash": "60f12bc5c5bfaeddf68a5e42a85ea0e5",
+      "sourceName": "contracts/ParkingSpotAttributes.sol",
+      "solcConfig": {
+        "version": "0.8.12",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.7"
+      ],
+      "artifacts": [
+        "ParkingSpotAttributes",
+        "ParkingSpotToken"
+      ]
     }
   }
 }

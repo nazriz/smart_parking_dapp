@@ -4,8 +4,9 @@ coverage
 coverage.json
 typechain
 typechain-types
+.prettierrc
+.prettierignore
 
 #Hardhat files
 cache
 artifacts
-
