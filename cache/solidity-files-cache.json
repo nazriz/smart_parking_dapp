@@ -1682,8 +1682,8 @@
       ]
     },
     "/Users/nazimrizvic/smart_parking_dapp/contracts/ParkingSpotAttributes.sol": {
-      "lastModificationDate": 1659062118971,
-      "contentHash": "60f12bc5c5bfaeddf68a5e42a85ea0e5",
+      "lastModificationDate": 1659064312435,
+      "contentHash": "4e5aaab13160584e61f2fccbf379b951",
       "sourceName": "contracts/ParkingSpotAttributes.sol",
       "solcConfig": {
         "version": "0.8.12",

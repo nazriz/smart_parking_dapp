@@ -35,7 +35,13 @@ function checkSpotAvailability(uint _parking_spot_id) public view returns (bool)
     return spot_available[_parking_spot_id];
 }
 
-function checkSpotPermittedParkingTime(uint _parking_spot_id) public view returns (bool) {
-    return permittedParkingTime[_parking_spot_id];
+function checkSpotPermittedParkingStartTime(uint _parking_spot_id) public view returns (uint16) {
+    availabilityTimes storage _attr = permittedParkingTime[_parking_spot_id];
+    return _attr.startTime;
+}
+
+function checkSpotPermittedParkingEndTime(uint _parking_spot_id) public view returns (uint16) {
+    availabilityTimes storage _attr = permittedParkingTime[_parking_spot_id];
+    return _attr.endTime;
 }
 }
