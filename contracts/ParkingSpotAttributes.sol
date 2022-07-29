@@ -9,8 +9,13 @@ interface ParkingSpotToken {
 contract ParkingSpotAttributes {
     ParkingSpotToken constant pst = ParkingSpotToken(0xaE35231E1919b0A1922DE02782D4c4DccD18c782);
 
+struct availabilityTimes {
+    uint16 startTime;
+    uint16 endTime;
+}
 
 mapping(uint => bool) public spot_available;
+mapping(uint=> availabilityTimes) public permittedParkingTime;
 
   function _isApprovedOrOwner(uint _parking_spot_id) internal view returns (bool) {
         return pst.ownerOf(_parking_spot_id) == msg.sender;
@@ -21,7 +26,16 @@ function setSpotAvailability(uint _parking_spot_id, bool _availability) external
     spot_available[_parking_spot_id] = _availability;
 }
 
+function setSpotPermittedParkingTime(uint _parking_spot_id, uint16 _start_time, uint16 _end_time) external {
+    require(_isApprovedOrOwner(_parking_spot_id));
+    permittedParkingTime[_parking_spot_id] = availabilityTimes(_start_time, _end_time);
+}
+
 function checkSpotAvailability(uint _parking_spot_id) public view returns (bool) {
     return spot_available[_parking_spot_id];
+}
+
+function checkSpotPermittedParkingTime(uint _parking_spot_id) public view returns (bool) {
+    return permittedParkingTime[_parking_spot_id];
 }
 }
