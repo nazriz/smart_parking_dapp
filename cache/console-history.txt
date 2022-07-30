@@ -1,4 +1,0 @@
-quit()
-exit()
-contractAddress.owner()
-let contractAddress = "0x6A3efF8066dF9580685405DE5C8278e572A4b451"

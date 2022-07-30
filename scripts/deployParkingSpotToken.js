@@ -8,7 +8,7 @@ const hre = require("hardhat");
 
 async function main() {
   const parkingSpotTokenContract = await hre.ethers.getContractFactory(
-    "ParkingSpotToken"
+    "contracts/ParkingSpotToken.sol:ParkingSpotToken"
   );
   const parkingSpotToken = await parkingSpotTokenContract.deploy();
 

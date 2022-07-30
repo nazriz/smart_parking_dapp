@@ -28,7 +28,7 @@ module.exports = {
   networks: {
     rinkeby: {
       url: RINKEBY_RPC_URL,
-      accounts: [DEMO_PRIVATE_KEY],
+      accounts: [PRIVATE_KEY],
       saveDeployments: true,
       chainId: 4,
       gas: 2100000,
