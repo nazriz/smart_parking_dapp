@@ -7,7 +7,7 @@ interface ParkingSpotToken {
 }
 
 contract ParkingSpotAttributes {
-    ParkingSpotToken constant pst = ParkingSpotToken(0xaE35231E1919b0A1922DE02782D4c4DccD18c782);
+    ParkingSpotToken constant pst = ParkingSpotToken(0x1bb972C2194f7dD7A38BC529e5aa2967332a2f38);
 
 struct availabilityTimes {
     uint16 startTime;
