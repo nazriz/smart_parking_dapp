@@ -6,16 +6,14 @@
 // global scope, and execute the script.
 const hre = require("hardhat");
 
-async function main() {
-  const apiConsumerContract = await hre.ethers.getContractFactory(
-    "GenericLargeResponse"
-  );
+module.exports = async function main() {
+  const apiConsumerContract = await hre.ethers.getContractFactory("GenericLargeResponse");
   const apiConsumer = await apiConsumerContract.deploy();
 
   await apiConsumer.deployed();
 
   console.log("Deployed to:", apiConsumer.address);
-}
+};
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
@@ -23,3 +21,5 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+module.exports.tags = ["all", "api"];

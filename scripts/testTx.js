@@ -17,6 +17,8 @@ const responseContract = new ethers.Contract(
 const test = async () => {
   let data = await responseContract.parking_spot_location();
 
+
+
   console.log(`Data is: ${data}`);
   // console.log(rinkebySigner.address);
 

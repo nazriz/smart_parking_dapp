@@ -1,5 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
+require("hardhat-deploy");
+require("@appliedblockchain/chainlink-plugins-fund-link");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 
@@ -23,9 +25,30 @@ module.exports = {
       {
         version: "0.8.0",
       },
+      {
+        version: "0.6.0",
+      },
+      {
+        version: "0.6.6",
+      },
+      {
+        version: "0.4.11",
+      },
+      {
+        version: "0.4.24",
+      },
+      // {
+      //   version: "0.4.8",
+      // },
     ],
   },
   networks: {
+    hardhat: {
+      chainId: 31337,
+    },
+    localhost: {
+      chainId: 31337,
+    },
     rinkeby: {
       url: RINKEBY_RPC_URL,
       accounts: [PRIVATE_KEY],
@@ -38,5 +61,11 @@ module.exports = {
   etherscan: {
     // yarn hardhat verify --network <NETWORK> <CONTRACT_ADDRESS> <CONSTRUCTOR_PARAMETERS>
     apiKey: ETHERSCAN_API_KEY,
+  },
+  namedAccounts: {
+    deployer: {
+      default: 0, // here this will by default take the first account as deployer
+      1: 0, // similarly on mainnet it will take the first account as deployer. Note though that depending on how hardhat network are configured, the account 0 on one network can be different than on another
+    },
   },
 };

@@ -6,7 +6,7 @@
 // global scope, and execute the script.
 const hre = require("hardhat");
 
-async function main() {
+module.exports = async function main() {
   const parkingSpotTokenContract = await hre.ethers.getContractFactory(
     "contracts/ParkingSpotToken.sol:ParkingSpotToken"
   );
@@ -15,7 +15,7 @@ async function main() {
   await parkingSpotToken.deployed();
 
   console.log("Deployed to:", parkingSpotToken.address);
-}
+};
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
@@ -23,3 +23,5 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+module.exports.tags = ["all", "token"];

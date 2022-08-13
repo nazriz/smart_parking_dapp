@@ -5,28 +5,32 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-interface GenericLargeResponse {
+interface OffchainParkingDataResponse {
     function checkParkingSpotLocationOwner(address _address) external view returns ( bytes32);
     function checkParkingSpotLocationOwnerArray(address _address, uint16 _index) external view returns ( bytes32);
 }
 contract ParkingSpotToken is ERC721URIStorage {
 
-    GenericLargeResponse constant glr = GenericLargeResponse(0xaDF4FEDFCD28C39a484F96895A95871C2BA37A60);
 
     mapping(bytes32=>bool) public spotTokenised;
+    address private OffchainParkingDataResponseAddress;
 
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-    constructor() ERC721("ParkingSpotToken", "PST") public {
+    constructor(address _OffchainParkingDataResponseAddress) ERC721("ParkingSpotToken", "PST") public {
+        OffchainParkingDataResponseAddress = _OffchainParkingDataResponseAddress;
     }
+
+    OffchainParkingDataResponse immutable opdr = OffchainParkingDataResponse(OffchainParkingDataResponseAddress);
+
 
     function confirmNotMinted(bytes32 _parkingSpot) internal view returns (bool) {
         return spotTokenised[_parkingSpot];
     }
 
     function retrieveLatLongBytes(uint16 _index) internal returns (bytes32) {
-        return glr.checkParkingSpotLocationOwnerArray(msg.sender, _index);
+        return opdr.checkParkingSpotLocationOwnerArray(msg.sender, _index);
     }
 
     function generateTokenURI(bytes32 _parkingSpot) internal returns (string memory ) {

@@ -6,8 +6,8 @@ interface ParkingSpotToken {
     function ownerOf(uint) external view returns (address);
 }
 
+
 contract ParkingSpotAttributes {
-    ParkingSpotToken constant pst = ParkingSpotToken(0x1bb972C2194f7dD7A38BC529e5aa2967332a2f38);
 
 struct availabilityTimes {
     uint16 startTime;
@@ -17,7 +17,16 @@ struct availabilityTimes {
 mapping(uint => bool) public spot_available;
 mapping(uint=> availabilityTimes) public permittedParkingTime;
 
-  function _isApprovedOrOwner(uint _parking_spot_id) internal view returns (bool) {
+address private parkingSpotTokenAddress;
+
+
+constructor (address _parkingSpotTokenAddress) public {
+    parkingSpotTokenAddress = _parkingSpotTokenAddress;
+}
+
+    ParkingSpotToken immutable pst = ParkingSpotToken(parkingSpotTokenAddress);
+
+function _isApprovedOrOwner(uint _parking_spot_id) internal view returns (bool) {
         return pst.ownerOf(_parking_spot_id) == msg.sender;
     }
 
