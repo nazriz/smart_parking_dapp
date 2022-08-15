@@ -1,0 +1,7 @@
+1. The interfaces between contracts is broken. I suspect it might have to do with the data
+type that's being passed to the contracts, i.e. should be a string instead of an address.
+
+2. when fakefullfilbytes() in offchainparkingdataresponse.sol is called,  the mapping between addresses
+and bytes is not updated. This one I'm less sure as to why it's broken, but check the function in detail.
+
+Additionally, I suspect the broke fakefulfillbytes is also breaking all of the tests that rely on it's data.
