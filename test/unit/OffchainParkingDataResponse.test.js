@@ -35,12 +35,14 @@ const { numToBytes32 } = require("@chainlink/test-helpers/dist/src/helpers");
       });
 
       it("Should successfully make an API request and get a result", async () => {
-        const transaction = await offchainParkingDataResponse.requestOffchainParkingSpotData();
+        const transaction = await offchainParkingDataResponse.fakeFulfillBytes();
         const transactionReceipt = await transaction.wait(1);
-        const requestId = transactionReceipt.events[0].topics[1];
-        const callbackValue = "0x0000000000000000000000000000000000000000000000000000000000000000";
-        await mockOracle.fulfillOracleRequest(requestId, numToBytes32(callbackValue));
+        // const requestId = transactionReceipt.events[0].topics[1];
+        // co-ords of "88.8888, 88.8888"
+        const callbackValue = "0x38382e383838382c2038382e3838383800000000000000000000000000000000";
+        // await mockOracle.fulfillOracleRequest(requestId, numToBytes32(callbackValue));
         const parking_spot_location = await offchainParkingDataResponse.parking_spot_location();
+        console.log(`PArking spot location data is: ${parking_spot_location}`);
         assert.equal(parking_spot_location.toString(), callbackValue.toString());
       });
 

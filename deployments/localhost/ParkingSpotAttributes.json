@@ -1,0 +1,278 @@
+{
+  "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_parkingSpotTokenAddress",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_parking_spot_id",
+          "type": "uint256"
+        }
+      ],
+      "name": "checkSpotAvailability",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_parking_spot_id",
+          "type": "uint256"
+        }
+      ],
+      "name": "checkSpotPermittedParkingEndTime",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_parking_spot_id",
+          "type": "uint256"
+        }
+      ],
+      "name": "checkSpotPermittedParkingStartTime",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "permittedParkingTime",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "startTime",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16",
+          "name": "endTime",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_parking_spot_id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "_availability",
+          "type": "bool"
+        }
+      ],
+      "name": "setSpotAvailability",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_parking_spot_id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint16",
+          "name": "_start_time",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16",
+          "name": "_end_time",
+          "type": "uint16"
+        }
+      ],
+      "name": "setSpotPermittedParkingTime",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "spot_available",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x7f253f96ce5fa38c117f5f8cf9ab0280586c35407e53ae34387057cc40963993",
+  "receipt": {
+    "to": null,
+    "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "contractAddress": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+    "transactionIndex": 0,
+    "gasUsed": "560282",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xd85de252bda2379e028df635223232a8fef311da47a8f3a8a1a9acad43eceb4a",
+    "transactionHash": "0x7f253f96ce5fa38c117f5f8cf9ab0280586c35407e53ae34387057cc40963993",
+    "logs": [],
+    "blockNumber": 5,
+    "cumulativeGasUsed": "560282",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "58cf5698ee34bc9fbaa37165c70a6070",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.12+commit.f00d7308\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_parkingSpotTokenAddress\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_parking_spot_id\",\"type\":\"uint256\"}],\"name\":\"checkSpotAvailability\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_parking_spot_id\",\"type\":\"uint256\"}],\"name\":\"checkSpotPermittedParkingEndTime\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_parking_spot_id\",\"type\":\"uint256\"}],\"name\":\"checkSpotPermittedParkingStartTime\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"permittedParkingTime\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"startTime\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"endTime\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_parking_spot_id\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"_availability\",\"type\":\"bool\"}],\"name\":\"setSpotAvailability\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_parking_spot_id\",\"type\":\"uint256\"},{\"internalType\":\"uint16\",\"name\":\"_start_time\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"_end_time\",\"type\":\"uint16\"}],\"name\":\"setSpotPermittedParkingTime\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"spot_available\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/ParkingSpotAttributes.sol\":\"ParkingSpotAttributes\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/ParkingSpotAttributes.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.7;\\n\\ninterface ParkingSpotToken {\\n    function ownerOf(uint) external view returns (address);\\n}\\n\\n\\ncontract ParkingSpotAttributes {\\n\\nstruct availabilityTimes {\\n    uint16 startTime;\\n    uint16 endTime;\\n}\\n\\nmapping(uint => bool) public spot_available;\\nmapping(uint=> availabilityTimes) public permittedParkingTime;\\n\\naddress private parkingSpotTokenAddress;\\n\\nconstructor (address _parkingSpotTokenAddress) public {\\n    parkingSpotTokenAddress = _parkingSpotTokenAddress;\\n}\\n\\n    ParkingSpotToken immutable pst = ParkingSpotToken(parkingSpotTokenAddress);\\n\\nfunction isApprovedOrOwner(uint _parking_spot_id) internal view returns (bool) {\\n        return pst.ownerOf(_parking_spot_id) == msg.sender;\\n    }\\n\\nfunction setSpotAvailability(uint _parking_spot_id, bool _availability) external {\\n    require(isApprovedOrOwner(_parking_spot_id), \\\"Not approved to update parking spot Availability\\\"); \\n    spot_available[_parking_spot_id] = _availability;\\n}\\n\\nfunction setSpotPermittedParkingTime(uint _parking_spot_id, uint16 _start_time, uint16 _end_time) external {\\n    require(isApprovedOrOwner(_parking_spot_id), \\\"Not approved to update parking spot availability times\\\");\\n    permittedParkingTime[_parking_spot_id] = availabilityTimes(_start_time, _end_time);\\n}\\n\\nfunction checkSpotAvailability(uint _parking_spot_id) public view returns (bool) {\\n    return spot_available[_parking_spot_id];\\n}\\n\\nfunction checkSpotPermittedParkingStartTime(uint _parking_spot_id) public view returns (uint16) {\\n    availabilityTimes storage _attr = permittedParkingTime[_parking_spot_id];\\n    return _attr.startTime;\\n}\\n\\nfunction checkSpotPermittedParkingEndTime(uint _parking_spot_id) public view returns (uint16) {\\n    availabilityTimes storage _attr = permittedParkingTime[_parking_spot_id];\\n    return _attr.endTime;\\n}\\n}\",\"keccak256\":\"0x0e44d933c8af60c3ba1bb52b32c55c4306436b60fca0b0eefd9dd726cafd72f9\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x60a0604052600260009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1660809073ffffffffffffffffffffffffffffffffffffffff1681525034801561006557600080fd5b50604051610a2a380380610a2a83398181016040528101906100879190610131565b80600260006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505061015e565b600080fd5b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b60006100fe826100d3565b9050919050565b61010e816100f3565b811461011957600080fd5b50565b60008151905061012b81610105565b92915050565b600060208284031215610147576101466100ce565b5b60006101558482850161011c565b91505092915050565b6080516108b161017960003960006103f101526108b16000f3fe608060405234801561001057600080fd5b506004361061007d5760003560e01c8063a53308dc1161005b578063a53308dc146100ea578063ccc5ffe91461011b578063e91926f11461014b578063f89c26d01461017b5761007d565b80631a1089c21461008257806332cb2364146100b25780638a5103f4146100ce575b600080fd5b61009c600480360381019061009791906104e2565b6101ab565b6040516100a9919061052c565b60405180910390f35b6100cc60048036038101906100c7919061057f565b6101de565b005b6100e860048036038101906100e391906105eb565b610254565b005b61010460048036038101906100ff91906104e2565b61031a565b60405161011292919061063e565b60405180910390f35b610135600480360381019061013091906104e2565b61035a565b604051610142919061052c565b60405180910390f35b610165600480360381019061016091906104e2565b61038d565b6040516101729190610676565b60405180910390f35b610195600480360381019061019091906104e2565b6103b6565b6040516101a29190610676565b60405180910390f35b6000806001600084815260200190815260200160002090508060000160029054906101000a900461ffff16915050919050565b6101e7826103d6565b610226576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161021d90610714565b60405180910390fd5b8060008084815260200190815260200160002060006101000a81548160ff0219169083151502179055505050565b61025d836103d6565b61029c576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610293906107a6565b60405180910390fd5b60405180604001604052808361ffff1681526020018261ffff168152506001600085815260200190815260200160002060008201518160000160006101000a81548161ffff021916908361ffff16021790555060208201518160000160026101000a81548161ffff021916908361ffff160217905550905050505050565b60016020528060005260406000206000915090508060000160009054906101000a900461ffff16908060000160029054906101000a900461ffff16905082565b6000806001600084815260200190815260200160002090508060000160009054906101000a900461ffff16915050919050565b600080600083815260200190815260200160002060009054906101000a900460ff169050919050565b60006020528060005260406000206000915054906101000a900460ff1681565b60003373ffffffffffffffffffffffffffffffffffffffff167f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff16636352211e846040518263ffffffff1660e01b815260040161044891906107d5565b602060405180830381865afa158015610465573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610489919061084e565b73ffffffffffffffffffffffffffffffffffffffff16149050919050565b600080fd5b6000819050919050565b6104bf816104ac565b81146104ca57600080fd5b50565b6000813590506104dc816104b6565b92915050565b6000602082840312156104f8576104f76104a7565b5b6000610506848285016104cd565b91505092915050565b600061ffff82169050919050565b6105268161050f565b82525050565b6000602082019050610541600083018461051d565b92915050565b60008115159050919050565b61055c81610547565b811461056757600080fd5b50565b60008135905061057981610553565b92915050565b60008060408385031215610596576105956104a7565b5b60006105a4858286016104cd565b92505060206105b58582860161056a565b9150509250929050565b6105c88161050f565b81146105d357600080fd5b50565b6000813590506105e5816105bf565b92915050565b600080600060608486031215610604576106036104a7565b5b6000610612868287016104cd565b9350506020610623868287016105d6565b9250506040610634868287016105d6565b9150509250925092565b6000604082019050610653600083018561051d565b610660602083018461051d565b9392505050565b61067081610547565b82525050565b600060208201905061068b6000830184610667565b92915050565b600082825260208201905092915050565b7f4e6f7420617070726f76656420746f20757064617465207061726b696e67207360008201527f706f7420417661696c6162696c69747900000000000000000000000000000000602082015250565b60006106fe603083610691565b9150610709826106a2565b604082019050919050565b6000602082019050818103600083015261072d816106f1565b9050919050565b7f4e6f7420617070726f76656420746f20757064617465207061726b696e67207360008201527f706f7420617661696c6162696c6974792074696d657300000000000000000000602082015250565b6000610790603683610691565b915061079b82610734565b604082019050919050565b600060208201905081810360008301526107bf81610783565b9050919050565b6107cf816104ac565b82525050565b60006020820190506107ea60008301846107c6565b92915050565b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b600061081b826107f0565b9050919050565b61082b81610810565b811461083657600080fd5b50565b60008151905061084881610822565b92915050565b600060208284031215610864576108636104a7565b5b600061087284828501610839565b9150509291505056fea26469706673582212204d0a318131b884d47b890478aa75dd60f0d2c0a241c9fec837cd874fd8649f0b64736f6c634300080c0033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061007d5760003560e01c8063a53308dc1161005b578063a53308dc146100ea578063ccc5ffe91461011b578063e91926f11461014b578063f89c26d01461017b5761007d565b80631a1089c21461008257806332cb2364146100b25780638a5103f4146100ce575b600080fd5b61009c600480360381019061009791906104e2565b6101ab565b6040516100a9919061052c565b60405180910390f35b6100cc60048036038101906100c7919061057f565b6101de565b005b6100e860048036038101906100e391906105eb565b610254565b005b61010460048036038101906100ff91906104e2565b61031a565b60405161011292919061063e565b60405180910390f35b610135600480360381019061013091906104e2565b61035a565b604051610142919061052c565b60405180910390f35b610165600480360381019061016091906104e2565b61038d565b6040516101729190610676565b60405180910390f35b610195600480360381019061019091906104e2565b6103b6565b6040516101a29190610676565b60405180910390f35b6000806001600084815260200190815260200160002090508060000160029054906101000a900461ffff16915050919050565b6101e7826103d6565b610226576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161021d90610714565b60405180910390fd5b8060008084815260200190815260200160002060006101000a81548160ff0219169083151502179055505050565b61025d836103d6565b61029c576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610293906107a6565b60405180910390fd5b60405180604001604052808361ffff1681526020018261ffff168152506001600085815260200190815260200160002060008201518160000160006101000a81548161ffff021916908361ffff16021790555060208201518160000160026101000a81548161ffff021916908361ffff160217905550905050505050565b60016020528060005260406000206000915090508060000160009054906101000a900461ffff16908060000160029054906101000a900461ffff16905082565b6000806001600084815260200190815260200160002090508060000160009054906101000a900461ffff16915050919050565b600080600083815260200190815260200160002060009054906101000a900460ff169050919050565b60006020528060005260406000206000915054906101000a900460ff1681565b60003373ffffffffffffffffffffffffffffffffffffffff167f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff16636352211e846040518263ffffffff1660e01b815260040161044891906107d5565b602060405180830381865afa158015610465573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610489919061084e565b73ffffffffffffffffffffffffffffffffffffffff16149050919050565b600080fd5b6000819050919050565b6104bf816104ac565b81146104ca57600080fd5b50565b6000813590506104dc816104b6565b92915050565b6000602082840312156104f8576104f76104a7565b5b6000610506848285016104cd565b91505092915050565b600061ffff82169050919050565b6105268161050f565b82525050565b6000602082019050610541600083018461051d565b92915050565b60008115159050919050565b61055c81610547565b811461056757600080fd5b50565b60008135905061057981610553565b92915050565b60008060408385031215610596576105956104a7565b5b60006105a4858286016104cd565b92505060206105b58582860161056a565b9150509250929050565b6105c88161050f565b81146105d357600080fd5b50565b6000813590506105e5816105bf565b92915050565b600080600060608486031215610604576106036104a7565b5b6000610612868287016104cd565b9350506020610623868287016105d6565b9250506040610634868287016105d6565b9150509250925092565b6000604082019050610653600083018561051d565b610660602083018461051d565b9392505050565b61067081610547565b82525050565b600060208201905061068b6000830184610667565b92915050565b600082825260208201905092915050565b7f4e6f7420617070726f76656420746f20757064617465207061726b696e67207360008201527f706f7420417661696c6162696c69747900000000000000000000000000000000602082015250565b60006106fe603083610691565b9150610709826106a2565b604082019050919050565b6000602082019050818103600083015261072d816106f1565b9050919050565b7f4e6f7420617070726f76656420746f20757064617465207061726b696e67207360008201527f706f7420617661696c6162696c6974792074696d657300000000000000000000602082015250565b6000610790603683610691565b915061079b82610734565b604082019050919050565b600060208201905081810360008301526107bf81610783565b9050919050565b6107cf816104ac565b82525050565b60006020820190506107ea60008301846107c6565b92915050565b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b600061081b826107f0565b9050919050565b61082b81610810565b811461083657600080fd5b50565b60008151905061084881610822565b92915050565b600060208284031215610864576108636104a7565b5b600061087284828501610839565b9150509291505056fea26469706673582212204d0a318131b884d47b890478aa75dd60f0d2c0a241c9fec837cd874fd8649f0b64736f6c634300080c0033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 5168,
+        "contract": "contracts/ParkingSpotAttributes.sol:ParkingSpotAttributes",
+        "label": "spot_available",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_uint256,t_bool)"
+      },
+      {
+        "astId": 5173,
+        "contract": "contracts/ParkingSpotAttributes.sol:ParkingSpotAttributes",
+        "label": "permittedParkingTime",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_uint256,t_struct(availabilityTimes)5164_storage)"
+      },
+      {
+        "astId": 5175,
+        "contract": "contracts/ParkingSpotAttributes.sol:ParkingSpotAttributes",
+        "label": "parkingSpotTokenAddress",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_address"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_uint256,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_uint256",
+        "label": "mapping(uint256 => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_mapping(t_uint256,t_struct(availabilityTimes)5164_storage)": {
+        "encoding": "mapping",
+        "key": "t_uint256",
+        "label": "mapping(uint256 => struct ParkingSpotAttributes.availabilityTimes)",
+        "numberOfBytes": "32",
+        "value": "t_struct(availabilityTimes)5164_storage"
+      },
+      "t_struct(availabilityTimes)5164_storage": {
+        "encoding": "inplace",
+        "label": "struct ParkingSpotAttributes.availabilityTimes",
+        "members": [
+          {
+            "astId": 5161,
+            "contract": "contracts/ParkingSpotAttributes.sol:ParkingSpotAttributes",
+            "label": "startTime",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint16"
+          },
+          {
+            "astId": 5163,
+            "contract": "contracts/ParkingSpotAttributes.sol:ParkingSpotAttributes",
+            "label": "endTime",
+            "offset": 2,
+            "slot": "0",
+            "type": "t_uint16"
+          }
+        ],
+        "numberOfBytes": "32"
+      },
+      "t_uint16": {
+        "encoding": "inplace",
+        "label": "uint16",
+        "numberOfBytes": "2"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}
