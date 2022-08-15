@@ -34,7 +34,7 @@ contract ParkingSpotToken is ERC721URIStorage {
     }
 
     function generateTokenURI(bytes32 _parkingSpot) internal returns (string memory ) {
-        require(!confirmNotMinted(_parkingSpot));
+        require(!confirmNotMinted(_parkingSpot), "Parking spot co-ordinates are already minted as a token");
         string memory plainDataSchemeURI = "data:text/plain;charset=UTF-8,parkingSpotLatLong:";
         string memory parkingSpotString = Strings.toHexString(uint160(msg.sender), 32);
         string memory dataSchemeURI = string.concat(plainDataSchemeURI,parkingSpotString);
