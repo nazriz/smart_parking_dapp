@@ -19,24 +19,23 @@ mapping(uint=> availabilityTimes) public permittedParkingTime;
 
 address private parkingSpotTokenAddress;
 
-
 constructor (address _parkingSpotTokenAddress) public {
     parkingSpotTokenAddress = _parkingSpotTokenAddress;
 }
 
     ParkingSpotToken immutable pst = ParkingSpotToken(parkingSpotTokenAddress);
 
-function _isApprovedOrOwner(uint _parking_spot_id) internal view returns (bool) {
+function isApprovedOrOwner(uint _parking_spot_id) internal view returns (bool) {
         return pst.ownerOf(_parking_spot_id) == msg.sender;
     }
 
 function setSpotAvailability(uint _parking_spot_id, bool _availability) external {
-    require(_isApprovedOrOwner(_parking_spot_id)); 
+    require(isApprovedOrOwner(_parking_spot_id), "Not approved to update parking spot Availability"); 
     spot_available[_parking_spot_id] = _availability;
 }
 
 function setSpotPermittedParkingTime(uint _parking_spot_id, uint16 _start_time, uint16 _end_time) external {
-    require(_isApprovedOrOwner(_parking_spot_id));
+    require(isApprovedOrOwner(_parking_spot_id), "Not approved to update parking spot availability times");
     permittedParkingTime[_parking_spot_id] = availabilityTimes(_start_time, _end_time);
 }
 
