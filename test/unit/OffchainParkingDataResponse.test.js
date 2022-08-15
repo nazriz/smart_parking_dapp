@@ -42,32 +42,17 @@ const { numToBytes32 } = require("@chainlink/test-helpers/dist/src/helpers");
         const callbackValue = "0x38382e383838382c2038382e3838383800000000000000000000000000000000";
         // await mockOracle.fulfillOracleRequest(requestId, numToBytes32(callbackValue));
         const parking_spot_location = await offchainParkingDataResponse.parking_spot_location();
-        console.log(`PArking spot location data is: ${parking_spot_location}`);
         assert.equal(parking_spot_location.toString(), callbackValue.toString());
       });
 
-      it("Our event should successfully fire event on callback", async () => {
-        const callbackValue = 777;
-        // we setup a promise so we can wait for our callback from the `once` function
-        await new Promise(async (resolve, reject) => {
-          // setup listener for our event
-          offchainParkingDataResponse.once("DataFullfilled", async () => {
-            console.log("DataFullfilled event fired!");
-            const parking_spot_location = await offchainParkingDataResponse.parking_spot_location();
-            // assert throws an error if it fails, so we need to wrap
-            // it in a try/catch so that the promise returns event
-            // if it fails.
-            try {
-              assert.equal(parking_spot_location.toString(), callbackValue.toString());
-              resolve();
-            } catch (e) {
-              reject(e);
-            }
-          });
-          const transaction = await offchainParkingDataResponse.requestOffchainParkingSpotData();
-          const transactionReceipt = await transaction.wait(1);
-          const requestId = transactionReceipt.events[0].topics[1];
-          await mockOracle.fulfillOracleRequest(requestId, numToBytes32(callbackValue));
-        });
+      it("Should map the caller address to the bytes value", async () => {
+        const [addr1] = await ethers.getSigners();
+        await offchainParkingDataResponse.connect(addr1).fakeFulfillBytes();
+        const parking_spot_location = await offchainParkingDataResponse.connect(addr1).parking_spot_location();
+        const ownerCheck = await offchainParkingDataResponse.parkingSpotLocationOwner(addr1.address);
+
+        console.log(parking_spot_location);
+        console.log(ownerCheck);
+        assert.equal(parking_spot_location.toString(), ownerCheck.toString());
       });
     });

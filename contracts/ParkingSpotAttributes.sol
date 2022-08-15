@@ -17,7 +17,7 @@ struct availabilityTimes {
 mapping(uint => bool) public spot_available;
 mapping(uint=> availabilityTimes) public permittedParkingTime;
 
-address private parkingSpotTokenAddress;
+address public parkingSpotTokenAddress;
 
 constructor (address _parkingSpotTokenAddress) public {
     parkingSpotTokenAddress = _parkingSpotTokenAddress;

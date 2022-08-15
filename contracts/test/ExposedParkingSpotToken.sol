@@ -11,8 +11,9 @@ interface OffchainParkingDataResponse {
 }
 contract ParkingSpotToken is ERC721URIStorage {
 
+
     mapping(bytes32=>bool) public spotTokenised;
-    address public OffchainParkingDataResponseAddress;
+    address private OffchainParkingDataResponseAddress;
 
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
@@ -24,15 +25,18 @@ contract ParkingSpotToken is ERC721URIStorage {
     OffchainParkingDataResponse immutable opdr = OffchainParkingDataResponse(OffchainParkingDataResponseAddress);
 
 
-    function confirmNotMinted(bytes32 _parkingSpot) internal view returns (bool) {
+    // Visibility changed from internal to public for unit testing purposes
+    function confirmNotMinted(bytes32 _parkingSpot) public view returns (bool) {
         return spotTokenised[_parkingSpot];
     }
 
-    function retrieveLatLongBytes(uint16 _index) internal returns (bytes32) {
+     // Visibility changed from internal to public for unit testing purposes
+    function retrieveLatLongBytes(uint16 _index) public returns (bytes32) {
         return opdr.checkParkingSpotLocationOwnerArray(msg.sender, _index);
     }
 
-    function generateTokenURI(bytes32 _parkingSpot) internal returns (string memory ) {
+     // Visibility changed from internal to public for unit testing purposes
+    function generateTokenURI(bytes32 _parkingSpot) public returns (string memory ) {
         require(!confirmNotMinted(_parkingSpot), "Parking spot co-ordinates are already minted as a token");
         string memory plainDataSchemeURI = "data:text/plain;charset=UTF-8,parkingSpotLatLong:";
         string memory parkingSpotString = Strings.toHexString(uint160(msg.sender), 32);

@@ -32,7 +32,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [
@@ -78,7 +79,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [
@@ -128,7 +130,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [
@@ -172,7 +175,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [],
@@ -214,7 +218,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [
@@ -259,7 +264,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [],
@@ -301,7 +307,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [],
@@ -343,7 +350,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [],
@@ -385,7 +393,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [
@@ -430,7 +439,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [],
@@ -472,7 +482,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [],
@@ -514,7 +525,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [
@@ -558,7 +570,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [],
@@ -600,7 +613,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [],
@@ -642,7 +656,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [
@@ -686,7 +701,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [],
@@ -728,7 +744,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [
@@ -778,7 +795,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [
@@ -822,7 +840,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [],
@@ -864,7 +883,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [
@@ -908,7 +928,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [],
@@ -950,7 +971,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [],
@@ -992,7 +1014,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [
@@ -1036,7 +1059,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [],
@@ -1078,7 +1102,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [
@@ -1091,10 +1116,10 @@
         "ERC721URIStorage"
       ]
     },
-    "/Users/nazimrizvic/smart_parking_dapp/contracts/ParkingSpotToken.sol": {
-      "lastModificationDate": 1660527472419,
-      "contentHash": "bcfd63c28950c4bd7231157e94ce5369",
-      "sourceName": "contracts/ParkingSpotToken.sol",
+    "/Users/nazimrizvic/smart_parking_dapp/contracts/test/ExposedParkingSpotToken.sol": {
+      "lastModificationDate": 1660534866374,
+      "contentHash": "1ed624535f14611703195369868327f5",
+      "sourceName": "contracts/test/ExposedParkingSpotToken.sol",
       "solcConfig": {
         "version": "0.8.12",
         "settings": {
@@ -1122,7 +1147,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [
@@ -1168,7 +1194,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [],
@@ -1177,6 +1204,53 @@
       ],
       "artifacts": [
         "Counters"
+      ]
+    },
+    "/Users/nazimrizvic/smart_parking_dapp/contracts/ParkingSpotToken.sol": {
+      "lastModificationDate": 1660563261198,
+      "contentHash": "9619f2192c62909f82e5745aa8322d4a",
+      "sourceName": "contracts/ParkingSpotToken.sol",
+      "solcConfig": {
+        "version": "0.8.12",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          },
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol",
+        "@openzeppelin/contracts/utils/Counters.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "OffchainParkingDataResponse",
+        "ParkingSpotToken"
       ]
     },
     "/Users/nazimrizvic/smart_parking_dapp/node_modules/@chainlink/contracts/src/v0.8/mocks/VRFCoordinatorV2Mock.sol": {
@@ -1210,7 +1284,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [
@@ -1256,7 +1331,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [],
@@ -1298,7 +1374,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [],
@@ -1340,7 +1417,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [
@@ -1352,8 +1430,8 @@
       "artifacts": []
     },
     "/Users/nazimrizvic/smart_parking_dapp/contracts/ParkingSpotAttributes.sol": {
-      "lastModificationDate": 1660527422546,
-      "contentHash": "e5924bc784b804847245a1f5384b7126",
+      "lastModificationDate": 1660563247969,
+      "contentHash": "3ac5229bf8f6839b91d1999f70ad497b",
       "sourceName": "contracts/ParkingSpotAttributes.sol",
       "solcConfig": {
         "version": "0.8.12",
@@ -1382,7 +1460,8 @@
           },
           "metadata": {
             "useLiteralContent": true
-          }
+          },
+          "libraries": {}
         }
       },
       "imports": [],
