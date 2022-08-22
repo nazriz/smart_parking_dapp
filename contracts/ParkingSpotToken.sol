@@ -12,16 +12,14 @@ interface OffchainParkingDataResponse {
 contract ParkingSpotToken is ERC721URIStorage {
 
     mapping(bytes32=>bool) public spotTokenised;
-    address public OffchainParkingDataResponseAddress;
 
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-    constructor(address _OffchainParkingDataResponseAddress) ERC721("ParkingSpotToken", "PST") public {
-        OffchainParkingDataResponseAddress = _OffchainParkingDataResponseAddress;
+    constructor() ERC721("ParkingSpotToken", "PST") public {
     }
 
-    OffchainParkingDataResponse immutable opdr = OffchainParkingDataResponse(OffchainParkingDataResponseAddress);
+    OffchainParkingDataResponse immutable opdr = OffchainParkingDataResponse(0xaE35231E1919b0A1922DE02782D4c4DccD18c782);
 
 
     function confirmNotMinted(bytes32 _parkingSpot) internal view returns (bool) {

@@ -17,13 +17,9 @@ struct availabilityTimes {
 mapping(uint => bool) public spot_available;
 mapping(uint=> availabilityTimes) public permittedParkingTime;
 
-address public parkingSpotTokenAddress;
 
-constructor (address _parkingSpotTokenAddress) public {
-    parkingSpotTokenAddress = _parkingSpotTokenAddress;
-}
 
-    ParkingSpotToken immutable pst = ParkingSpotToken(parkingSpotTokenAddress);
+ParkingSpotToken constant pst = ParkingSpotToken(0xaE35231E1919b0A1922DE02782D4c4DccD18c782);
 
 function isApprovedOrOwner(uint _parking_spot_id) internal view returns (bool) {
         return pst.ownerOf(_parking_spot_id) == msg.sender;
