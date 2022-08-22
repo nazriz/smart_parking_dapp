@@ -19,7 +19,7 @@ mapping(uint=> availabilityTimes) public permittedParkingTime;
 
 
 
-ParkingSpotToken constant pst = ParkingSpotToken(0xaE35231E1919b0A1922DE02782D4c4DccD18c782);
+ParkingSpotToken constant pst = ParkingSpotToken(0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9);
 
 function isApprovedOrOwner(uint _parking_spot_id) internal view returns (bool) {
         return pst.ownerOf(_parking_spot_id) == msg.sender;

@@ -19,7 +19,9 @@ contract ParkingSpotToken is ERC721URIStorage {
     constructor() ERC721("ParkingSpotToken", "PST") public {
     }
 
-    OffchainParkingDataResponse immutable opdr = OffchainParkingDataResponse(0xaE35231E1919b0A1922DE02782D4c4DccD18c782);
+// Interface address is for local network, must be updated for network deployed to.
+
+    OffchainParkingDataResponse constant opdr = OffchainParkingDataResponse(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
 
 
     function confirmNotMinted(bytes32 _parkingSpot) internal view returns (bool) {

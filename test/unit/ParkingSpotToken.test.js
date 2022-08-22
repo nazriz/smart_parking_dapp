@@ -31,18 +31,22 @@ const { numToBytes32 } = require("@chainlink/test-helpers/dist/src/helpers");
 
       describe("Check OwnerOf token", function () {
         it("Should return the correct owner of the minted parking token", async () => {
-          await parkingSpotToken.mintParkingSpot();
-          expect(await parkingSpotToken.owner()).to.equal(owner.address);
+          const [addr1] = await ethers.getSigners();
+          await offchainParkingDataResponse.connect(addr1).fakeFulfillBytes();
+          const parking_spot_location = await offchainParkingDataResponse.connect(addr1).parking_spot_location();
+          console.log(parking_spot_location);
+
+          // await parkingSpotToken.mintParkingSpot(addr1.address, 0);
+          // expect(await parkingSpotToken.ownerOf(1)).to.equal(addr1.address);
         });
       });
 
       it("Should mint a parking spot token", async () => {
         const [owner] = await ethers.getSigners();
         // console.log(owner);
+
         await offchainParkingDataResponse.connect(owner).fakeFulfillBytes();
-        const parking_spot_location = await offchainParkingDataResponse.parking_spot_location();
-        console.log(parking_spot_location);
-        // await parkingSpotToken.mintParkingSpot(owner, 0);
+        await parkingSpotToken.mintParkingSpot(owner, 0);
         // tokenURI = await parkingSpotToken.tokenURI(0);
         // console.log(tokenURI);
         // expect(tokenURI).to.equal("test");

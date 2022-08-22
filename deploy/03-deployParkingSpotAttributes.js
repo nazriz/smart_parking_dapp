@@ -14,10 +14,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   const currentAddresses = JSON.parse(fs.readFileSync(ADDRESSES_FILE, "utf-8"));
   offchainParkingDataResponseAddress = currentAddresses[chainId][0];
-  console.log(offchainParkingDataResponseAddress);
 
   const waitBlockConfirmations = developmentChains.includes(network.name) ? 1 : VERIFICATION_BLOCK_CONFIRMATIONS;
-  const args = [offchainParkingDataResponseAddress];
+  const args = [];
   const parkingSpotAttributes = await deploy("ParkingSpotAttributes", {
     // contract: "contracts/parkingSpotAttributes.sol:ParkingSpotAttributes",
     from: deployer,

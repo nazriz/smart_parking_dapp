@@ -56,8 +56,8 @@ contract OffchainParkingDataResponse is ChainlinkClient, ConfirmedOwner {
         // emit RequestFulfilled(requestId, bytesData);
         data = "88.8888, 88.8888";
         parking_spot_location = bytes32(data);
-        parkingSpotLocationOwner[parkingSpotRequesterAddr] = bytes32(data);
-        parkingSpotLocationOwnerArray[parkingSpotRequesterAddr].push(bytes32(data));
+        parkingSpotLocationOwner[msg.sender] = bytes32(data);
+        parkingSpotLocationOwnerArray[msg.sender].push(bytes32(data));
 
     }
 

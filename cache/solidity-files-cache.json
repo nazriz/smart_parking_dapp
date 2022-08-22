@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/nazimrizvic/smart_parking_dapp/contracts/OffchainParkingDataResponse.sol": {
-      "lastModificationDate": 1660530749804,
-      "contentHash": "46dfd051192c839fd9cf87a88bd58288",
+      "lastModificationDate": 1661137009555,
+      "contentHash": "520cdef2146e4b12c0b24a0c7f07867c",
       "sourceName": "contracts/OffchainParkingDataResponse.sol",
       "solcConfig": {
         "version": "0.8.12",
@@ -1180,8 +1180,8 @@
       ]
     },
     "/Users/nazimrizvic/smart_parking_dapp/contracts/ParkingSpotToken.sol": {
-      "lastModificationDate": 1661133203042,
-      "contentHash": "28a65e7227bed3b4c7904f30a166abdc",
+      "lastModificationDate": 1661138776545,
+      "contentHash": "184805a657cb7bfc275026c1be669770",
       "sourceName": "contracts/ParkingSpotToken.sol",
       "solcConfig": {
         "version": "0.8.12",
@@ -1398,8 +1398,8 @@
       "artifacts": []
     },
     "/Users/nazimrizvic/smart_parking_dapp/contracts/ParkingSpotAttributes.sol": {
-      "lastModificationDate": 1661133166903,
-      "contentHash": "81afe503d4c9562612ef067e80e8d3a0",
+      "lastModificationDate": 1661133520459,
+      "contentHash": "b246cf4ee5d1fc18c91dae089d395535",
       "sourceName": "contracts/ParkingSpotAttributes.sol",
       "solcConfig": {
         "version": "0.8.12",

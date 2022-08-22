@@ -17,8 +17,6 @@ const responseContract = new ethers.Contract(
 const test = async () => {
   let data = await responseContract.parking_spot_location();
 
-
-
   console.log(`Data is: ${data}`);
   // console.log(rinkebySigner.address);
 
@@ -33,3 +31,13 @@ const test = async () => {
 };
 
 test();
+
+const offchain = await (
+  await ethers.getContractFactory("contracts/OffchainParkingDataResponse.sol:OffchainParkingDataResponse")
+).attach("0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
+const token = await (
+  await ethers.getContractFactory("contracts/ParkingSpotToken.sol:ParkingSpotToken")
+).attach("0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9");
+const attributes = await (
+  await ethers.getContractFactory("ParkingSpotAttributes")
+).attach("0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9");
