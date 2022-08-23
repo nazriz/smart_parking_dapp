@@ -7,12 +7,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deploy, log, get } = deployments;
   const { deployer } = await getNamedAccounts();
   const chainId = network.config.chainId;
-  let offchainParkingDataResponseAddress;
   //set log level to ignore non errors
   ethers.utils.Logger.setLogLevel(ethers.utils.Logger.levels.ERROR);
-
-  const currentAddresses = JSON.parse(fs.readFileSync(ADDRESSES_FILE, "utf-8"));
-  offchainParkingDataResponseAddress = currentAddresses[chainId][0];
 
   const waitBlockConfirmations = developmentChains.includes(network.name) ? 1 : VERIFICATION_BLOCK_CONFIRMATIONS;
   const args = [];
