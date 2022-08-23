@@ -54,20 +54,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     }
   }
 
-  // Update contract addresses
-  const chainNumber = network.config.chainId.toString();
-  const currentAddresses = JSON.parse(fs.readFileSync(ADDRESSES_FILE, "utf-8"));
-  if (chainNumber in currentAddresses) {
-    if (!currentAddresses[chainNumber].includes(offChainParkingDataResponse.address)) {
-      currentAddresses[chainNumber].push(offChainParkingDataResponse.address);
-    }
-  }
-  {
-    currentAddresses[chainNumber] = [offChainParkingDataResponse.address];
-  }
-
-  fs.writeFileSync(ADDRESSES_FILE, JSON.stringify(currentAddresses));
-
   log("Run API Consumer contract with following command:");
   const networkName = network.name == "hardhat" ? "localhost" : network.name;
   log(`yarn hardhat request-data --contract ${offChainParkingDataResponse.address} --network ${networkName}`);
