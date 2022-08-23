@@ -22,12 +22,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
     log("Verifying...");
-    await verify(parkingSpotAttributes.address, args);
+    await verify(requestParkingSpotToken.address, args);
   }
-
-  log("Run API Consumer contract with following command:");
-  const networkName = network.name == "hardhat" ? "localhost" : network.name;
-  log(`yarn hardhat request-data --contract ${parkingSpotAttributes.address} --network ${networkName}`);
   log("----------------------------------------------------");
 };
 module.exports.tags = ["all", "request", "main"];

@@ -24,10 +24,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     log("Verifying...");
     await verify(parkingSpotToken.address, args);
   }
-
-  log("Run API Consumer contract with following command:");
-  const networkName = network.name == "hardhat" ? "localhost" : network.name;
-  log(`yarn hardhat request-data --contract ${parkingSpotToken.address} --network ${networkName}`);
   log("----------------------------------------------------");
 };
 module.exports.tags = ["all", "token", "main"];
