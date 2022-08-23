@@ -13,7 +13,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const waitBlockConfirmations = developmentChains.includes(network.name) ? 1 : VERIFICATION_BLOCK_CONFIRMATIONS;
   const args = [];
   const parkingSpotAttributes = await deploy("ParkingSpotAttributes", {
-    // contract: "contracts/parkingSpotAttributes.sol:ParkingSpotAttributes",
+    contract: "contracts/ParkingSpotAttributes.sol:ParkingSpotAttributes",
     from: deployer,
     args: args,
     log: true,

@@ -1,10 +1,12 @@
+const { providers } = require("ethers");
 const { getNamedAccounts, deployments, network } = require("hardhat");
 const hre = require("hardhat");
 require("dotenv").config();
 const { deployer } = getNamedAccounts();
 
 async function main() {
-  const accounts = await ethers.provider.listAccounts();
+  const provider = ethers.provider;
+  const [addr1, addr2] = await ethers.getSigners();
   const offchain = await (
     await ethers.getContractFactory("contracts/OffchainParkingDataResponse.sol:OffchainParkingDataResponse")
   ).attach("0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
@@ -12,9 +14,14 @@ async function main() {
     await ethers.getContractFactory("contracts/ParkingSpotToken.sol:ParkingSpotToken")
   ).attach("0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9");
   const attributes = await (
-    await ethers.getContractFactory("ParkingSpotAttributes")
+    await ethers.getContractFactory("contracts/ParkingSpotAttributes.sol:ParkingSpotAttributes")
   ).attach("0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9");
 
+  const requestSpot = await (
+    await ethers.getContractFactory("RequestParkingSpotToken")
+  ).attach("0x5FC8d32690cc91D4c39d9d3abcBD16989F875707");
+
+  // Mint Token from addr1
   console.log("Requesting fake bytes....");
   await offchain.fakeFulfillBytes();
   console.log("done!");
@@ -25,25 +32,40 @@ async function main() {
   console.log(await token.ownerOf(1));
   console.log("Current availability:");
   console.log(await attributes.checkSpotAvailability(1));
-  console.log("approved for dummy contract:");
+  console.log("approved for request contract:");
   console.log(
     await token.isApprovedForAll(
       "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-      "0x2EDca11fE8d9fBcA1258AeBb6e9436D67966eACD"
+      "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
     )
   );
+  console.log("Approving request contract...");
+  await token.setApprovalForAll("0x5FC8d32690cc91D4c39d9d3abcBD16989F875707", true);
   console.log("Setting availability....");
   await attributes.setSpotAvailability(1, 1);
   console.log("Current availability:");
   console.log(await attributes.checkSpotAvailability(1));
 
-  console.log("approved for dummy contract:");
+  console.log("approved for request contract:");
   console.log(
     await token.isApprovedForAll(
       "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-      "0x2EDca11fE8d9fBcA1258AeBb6e9436D67966eACD"
+      "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
     )
   );
+
+  await requestSpot.connect(addr2).deposit({ value: ethers.utils.parseUnits("2", "ether") });
+  console.log("depositing 1 eth...");
+  console.log("Balance of RequestParkingSpot:");
+  console.log(await provider.getBalance(requestSpot.address));
+  console.log("mapping balance");
+  console.log(await requestSpot.depositors(addr2.address));
+
+  console.log("requesting token...");
+  await requestSpot.connect(addr2).requestParkingSpotToken(1);
+
+  console.log("checking owner...");
+  console.log(await token.ownerOf(1));
 }
 
 main()
@@ -52,3 +74,13 @@ main()
     console.error(error);
     process.exit(1);
   });
+
+//   await requestSpot.connect(addr2).withdraw(ethers.utils.parseUnits("1", "ether"), {
+//     gasLimit: 2100000,
+//     gasPrice: 8000000000,
+//   });
+//   console.log("Withdrawing 1 eth...");
+//   console.log("Balance of RequestParkingSpot:");
+//   console.log(await provider.getBalance(requestSpot.address));
+//   console.log("mapping balance");
+//   console.log(await requestSpot.depositors(addr2.address));

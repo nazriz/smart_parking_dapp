@@ -1398,7 +1398,7 @@
       "artifacts": []
     },
     "/Users/nazimrizvic/smart_parking_dapp/contracts/ParkingSpotAttributes.sol": {
-      "lastModificationDate": 1661214299286,
+      "lastModificationDate": 1661222347917,
       "contentHash": "4f845b6976e095581b531c47d6da01e1",
       "sourceName": "contracts/ParkingSpotAttributes.sol",
       "solcConfig": {
@@ -1438,6 +1438,50 @@
       "artifacts": [
         "ParkingSpotAttributes",
         "ParkingSpotToken"
+      ]
+    },
+    "/Users/nazimrizvic/smart_parking_dapp/contracts/RequestParkingSpotToken.sol": {
+      "lastModificationDate": 1661222837127,
+      "contentHash": "61706a5cd2cea582fd67e2a69aab6f85",
+      "sourceName": "contracts/RequestParkingSpotToken.sol",
+      "solcConfig": {
+        "version": "0.8.12",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.7"
+      ],
+      "artifacts": [
+        "ParkingSpotAttributes",
+        "ParkingSpotToken",
+        "RequestParkingSpotToken"
       ]
     },
     "/Users/nazimrizvic/smart_parking_dapp/contracts/test/LinkToken.sol": {
@@ -2304,48 +2348,6 @@
       ],
       "artifacts": [
         "AggregatorV3Interface"
-      ]
-    },
-    "/Users/nazimrizvic/smart_parking_dapp/contracts/RequestParkingSpotToken.sol": {
-      "lastModificationDate": 1661214516898,
-      "contentHash": "38e0d87d67707be0f8b9faa0533d6e75",
-      "sourceName": "contracts/RequestParkingSpotToken.sol",
-      "solcConfig": {
-        "version": "0.8.12",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "devdoc",
-                "userdoc",
-                "storageLayout",
-                "evm.gasEstimates"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "metadata": {
-            "useLiteralContent": true
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.7"
-      ],
-      "artifacts": [
-        "RequestParkingSpotToken"
       ]
     }
   }

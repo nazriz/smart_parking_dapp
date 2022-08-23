@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/RequestParkingSpotToken.sol": {
+      "content": "//SPDX-License-Identifier: MIT\npragma solidity ^0.8.7;\n\ninterface ParkingSpotAttributes {\n    function checkSpotAvailability(uint) external view returns (bool);\n}\n\ninterface ParkingSpotToken {\n    function ownerOf(uint256) external returns (address);\n    function safeTransferFrom(address,address,uint256) external;\n\n}\n\ncontract RequestParkingSpotToken {\n\n    mapping(address=>uint256) public depositors;\n\n    ParkingSpotAttributes constant psa = ParkingSpotAttributes(0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9);\n    ParkingSpotToken constant pst = ParkingSpotToken(0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9);\n\n\n    // Payable address can receive Ether\n    address payable public owner;\n\n    // Payable constructor can receive Ether\n    constructor() payable {\n        owner = payable(msg.sender);\n    }\n\n    // Function to deposit Ether into this contract.\n    // Call this function along with some Ether.\n    // The balance of this contract will be automatically updated.\n    function deposit() public payable {\n        depositors[msg.sender] += msg.value;\n    }\n\n    // Function to withdraw all Ether from this contract.\n    function withdraw(uint256 _amount) public {\n        require(_amount <= depositors[msg.sender], \"Not enough ETH deposited\");\n        depositors[msg.sender] -= _amount;\n        (bool success, ) = msg.sender.call{value: _amount}(\"\");\n        require(success, \"Failed to send Ether\");\n\n    }\n\n\n    function requestParkingSpotToken(uint256 _tokenId) public {\n        require(depositors[msg.sender] >= 1000000000000000000, \"Must deposit at least 1 Eth\");\n        require(psa.checkSpotAvailability(_tokenId) == true, \"Parking spot is unavailable!\");\n\n        address currentOwner;\n        currentOwner = pst.ownerOf(_tokenId);\n        pst.safeTransferFrom(currentOwner, msg.sender, _tokenId);\n\n    }\n\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
