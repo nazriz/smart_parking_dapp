@@ -18,7 +18,7 @@ mapping(uint => bool) public spot_available;
 mapping(uint=> availabilityTimes) public permittedParkingTime;
 
 
-
+// Interface address is for local network, must be updated for network deployed to.
 ParkingSpotToken constant pst = ParkingSpotToken(0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9);
 
 function isApprovedOrOwner(uint _parking_spot_id) internal view returns (bool) {

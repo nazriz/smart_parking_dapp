@@ -2,6 +2,7 @@ const { getNamedAccounts, deployments, network } = require("hardhat");
 const { networkConfig, developmentChains, VERIFICATION_BLOCK_CONFIRMATIONS } = require("../helper-hardhat-config");
 const { autoFundCheck, verify } = require("../helper-functions");
 const fs = require("fs");
+const ADDRESSES_FILE = "./contractAddresses/parkingSpotTokenAddresses.json";
 
 module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deploy, log, get } = deployments;
