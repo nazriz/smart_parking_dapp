@@ -25,20 +25,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     await verify(parkingSpotToken.address, args);
   }
 
-  // Update contract addresses
-  const chainNumber = network.config.chainId.toString();
-  const currentParkingSpotTokenAddresses = JSON.parse(fs.readFileSync(PARKING_SPOT_TOKEN_ADDRESSES_FILE, "utf-8"));
-  if (chainNumber in currentParkingSpotTokenAddresses) {
-    if (!currentParkingSpotTokenAddresses[chainNumber].includes(parkingSpotToken.address)) {
-      currentParkingSpotTokenAddresses[chainNumber].push(parkingSpotToken.address);
-    }
-  }
-  {
-    currentParkingSpotTokenAddresses[chainNumber] = [parkingSpotToken.address];
-  }
-
-  fs.writeFileSync(PARKING_SPOT_TOKEN_ADDRESSES_FILE, JSON.stringify(currentParkingSpotTokenAddresses));
-
   log("Run API Consumer contract with following command:");
   const networkName = network.name == "hardhat" ? "localhost" : network.name;
   log(`yarn hardhat request-data --contract ${parkingSpotToken.address} --network ${networkName}`);
