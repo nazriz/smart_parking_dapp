@@ -10,8 +10,10 @@ interface ParkingSpotToken {
 contract ParkingSpotAttributes {
 
 struct availabilityTimes {
-    uint16 startTime;
-    uint16 endTime;
+    uint8 startHour;
+    uint8 startMinute; 
+    uint8 endHour; 
+    uint8 endMinute;
 }
 
 mapping(uint => bool) public spot_available;
@@ -30,22 +32,22 @@ function setSpotAvailability(uint _parking_spot_id, bool _availability) external
     spot_available[_parking_spot_id] = _availability;
 }
 
-function setSpotPermittedParkingTime(uint _parking_spot_id, uint16 _start_time, uint16 _end_time) external {
+function setSpotPermittedParkingTime(uint _parking_spot_id, uint8 _start_hour, uint8 _start_minute, uint8 _end_hour, uint8 _end_minute) external {
     require(isApprovedOrOwner(_parking_spot_id), "Not approved to update parking spot availability times");
-    permittedParkingTime[_parking_spot_id] = availabilityTimes(_start_time, _end_time);
+    permittedParkingTime[_parking_spot_id] = availabilityTimes(_start_hour, _start_minute, _end_hour, _end_minute);
 }
 
 function checkSpotAvailability(uint _parking_spot_id) public view returns (bool) {
     return spot_available[_parking_spot_id];
 }
 
-function checkSpotPermittedParkingStartTime(uint _parking_spot_id) public view returns (uint16) {
+function checkSpotPermittedParkingStartTime(uint _parking_spot_id) public view returns (uint8, uint8) {
     availabilityTimes storage _attr = permittedParkingTime[_parking_spot_id];
-    return _attr.startTime;
+    return (_attr.startHour, _attr.startMinute); 
 }
 
-function checkSpotPermittedParkingEndTime(uint _parking_spot_id) public view returns (uint16) {
+function checkSpotPermittedParkingEndTime(uint _parking_spot_id) public view returns (uint8, uint8) {
     availabilityTimes storage _attr = permittedParkingTime[_parking_spot_id];
-    return _attr.endTime;
+    return (_attr.endHour, _attr.endMinute); 
 }
 }
