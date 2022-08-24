@@ -1,8 +1,11 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
+import "./libraries/BokkyPooBahsDateTimeContract.sol"
+
 interface ParkingSpotAttributes {
     function checkSpotAvailability(uint) external view returns (bool);
+    
 }
 
 interface ParkingSpotToken {
@@ -43,6 +46,9 @@ contract RequestParkingSpotToken {
 
     }
 
+    function checkAndConvertAvailabilityTime() internal returns (bool) {
+
+    }
 
     function requestParkingSpotToken(uint256 _tokenId) public {
         require(depositors[msg.sender] >= 1000000000000000000, "Must deposit at least 1 Eth");
