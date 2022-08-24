@@ -1,5 +1,5 @@
 const { providers } = require("ethers");
-const { getNamedAccounts, deployments, network } = require("hardhat");
+const { getNamedAccounts, deployments, network, artifacts } = require("hardhat");
 const hre = require("hardhat");
 require("dotenv").config();
 const { deployer } = getNamedAccounts();
@@ -47,7 +47,7 @@ async function main() {
   console.log(await attributes.checkSpotAvailability(1));
 
   console.log("Setting start time 0900, end time 1700");
-  await attributes.setSpotPermittedParkingTime(1, 09, 30, 17, 30);
+  await attributes.setSpotPermittedParkingTime(1, 09, 00, 23, 00);
   console.log("onchain start time:");
   console.log(await attributes.checkSpotPermittedParkingStartTime(1));
   console.log("onchain end time:");
@@ -61,8 +61,10 @@ async function main() {
     )
   );
 
-  await requestSpot.getTime();
-  console.log(await requestSpot.timeRn());
+  console.log("setting parking spot timezone... ");
+  await attributes.setParkingSpotTimezone(1, 10);
+  console.log("timezone set to:");
+  console.log(await attributes.parkingSpotTimeZone(1));
 
   await requestSpot.connect(addr2).deposit({ value: ethers.utils.parseUnits("2", "ether") });
   console.log("depositing 1 eth...");
@@ -76,9 +78,6 @@ async function main() {
 
   console.log("checking owner...");
   console.log(await token.ownerOf(1));
-
-  const timeStamp = (await ethers.provider.getBlock("latest")).timestamp;
-  console.log(timeStamp);
 }
 
 main()

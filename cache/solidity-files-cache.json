@@ -88,8 +88,8 @@
       ]
     },
     "/Users/nazimrizvic/smart_parking_dapp/contracts/RequestParkingSpotToken.sol": {
-      "lastModificationDate": 1661326309381,
-      "contentHash": "ee475e2fc8830f2b17a4aac32d559e0e",
+      "lastModificationDate": 1661344707413,
+      "contentHash": "735f5cab9b8a15df7772c310f2bf3c5b",
       "sourceName": "contracts/RequestParkingSpotToken.sol",
       "solcConfig": {
         "version": "0.8.12",
@@ -1530,8 +1530,8 @@
       "artifacts": []
     },
     "/Users/nazimrizvic/smart_parking_dapp/contracts/ParkingSpotAttributes.sol": {
-      "lastModificationDate": 1661310269526,
-      "contentHash": "0b9ab15ae050009584c8667a4a03679c",
+      "lastModificationDate": 1661341261186,
+      "contentHash": "66a3e08feb56c98cd51496186d6ca509",
       "sourceName": "contracts/ParkingSpotAttributes.sol",
       "solcConfig": {
         "version": "0.8.12",
