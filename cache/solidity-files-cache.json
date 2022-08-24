@@ -2,7 +2,7 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/nazimrizvic/smart_parking_dapp/contracts/BokkyPooBahsDateTimeContract.sol": {
-      "lastModificationDate": 1661256610144,
+      "lastModificationDate": 1661307298384,
       "contentHash": "29f767d820f007bf22506288caff23df",
       "sourceName": "contracts/BokkyPooBahsDateTimeContract.sol",
       "solcConfig": {
@@ -46,7 +46,7 @@
       ]
     },
     "/Users/nazimrizvic/smart_parking_dapp/contracts/BokkyPooBahsDateTimeLibrary.sol": {
-      "lastModificationDate": 1661256536782,
+      "lastModificationDate": 1661307298422,
       "contentHash": "fc1bc15ac0a8120e741add7da1e2536a",
       "sourceName": "contracts/BokkyPooBahsDateTimeLibrary.sol",
       "solcConfig": {
@@ -87,8 +87,54 @@
         "BokkyPooBahsDateTimeLibrary"
       ]
     },
+    "/Users/nazimrizvic/smart_parking_dapp/contracts/RequestParkingSpotToken.sol": {
+      "lastModificationDate": 1661311219232,
+      "contentHash": "1c15bac284b81223b37f6c7656539bcc",
+      "sourceName": "contracts/RequestParkingSpotToken.sol",
+      "solcConfig": {
+        "version": "0.8.12",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./BokkyPooBahsDateTimeContract.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.7"
+      ],
+      "artifacts": [
+        "ParkingSpotAttributes",
+        "ParkingSpotToken",
+        "RequestParkingSpotToken"
+      ]
+    },
     "/Users/nazimrizvic/smart_parking_dapp/contracts/OffchainParkingDataResponse.sol": {
-      "lastModificationDate": 1661137009555,
+      "lastModificationDate": 1661257409862,
       "contentHash": "520cdef2146e4b12c0b24a0c7f07867c",
       "sourceName": "contracts/OffchainParkingDataResponse.sol",
       "solcConfig": {
@@ -1484,8 +1530,8 @@
       "artifacts": []
     },
     "/Users/nazimrizvic/smart_parking_dapp/contracts/ParkingSpotAttributes.sol": {
-      "lastModificationDate": 1661222347917,
-      "contentHash": "4f845b6976e095581b531c47d6da01e1",
+      "lastModificationDate": 1661310269526,
+      "contentHash": "0b9ab15ae050009584c8667a4a03679c",
       "sourceName": "contracts/ParkingSpotAttributes.sol",
       "solcConfig": {
         "version": "0.8.12",
@@ -1524,50 +1570,6 @@
       "artifacts": [
         "ParkingSpotAttributes",
         "ParkingSpotToken"
-      ]
-    },
-    "/Users/nazimrizvic/smart_parking_dapp/contracts/RequestParkingSpotToken.sol": {
-      "lastModificationDate": 1661256548974,
-      "contentHash": "61706a5cd2cea582fd67e2a69aab6f85",
-      "sourceName": "contracts/RequestParkingSpotToken.sol",
-      "solcConfig": {
-        "version": "0.8.12",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "devdoc",
-                "userdoc",
-                "storageLayout",
-                "evm.gasEstimates"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "metadata": {
-            "useLiteralContent": true
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.7"
-      ],
-      "artifacts": [
-        "ParkingSpotAttributes",
-        "ParkingSpotToken",
-        "RequestParkingSpotToken"
       ]
     },
     "/Users/nazimrizvic/smart_parking_dapp/contracts/test/LinkToken.sol": {

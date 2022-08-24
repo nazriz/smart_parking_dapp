@@ -1,2 +1,0 @@
-1. Add validation check for start time and end time, i.e. hour must be no more than 23, minute no more than 60. 
-This is important, as invalid input could lead to other conditions never becoming true
