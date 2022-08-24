@@ -62,4 +62,8 @@ function checkSpotPermittedParkingEndTime(uint _parking_spot_id) public view ret
     availabilityTimes storage _attr = permittedParkingTime[_parking_spot_id];
     return (_attr.endHour, _attr.endMinute); 
 }
+function checkParkingSpotTimezone(uint _parking_spot_id) public view returns (uint8) {
+    return parkingSpotTimeZone[_parking_spot_id];
+}
+
 }
