@@ -18,7 +18,7 @@ struct availabilityTimes {
 
 mapping(uint => bool) public spot_available;
 mapping(uint=> availabilityTimes) public permittedParkingTime;
-mapping(uint=> int8) public parkingSpotTimeZone;
+mapping(uint=> uint8) public parkingSpotTimeZone;
 
 
 
@@ -37,15 +37,15 @@ function setSpotAvailability(uint _parking_spot_id, bool _availability) external
 function setSpotPermittedParkingTime(uint _parking_spot_id, uint8 _start_hour, uint8 _start_minute, uint8 _end_hour, uint8 _end_minute) external {
     require(_start_hour <= 23, "Start hour must be between 0 and 23");
     require(_start_minute <= 59, "Start minute must be between 0 and 59");
-     require(_end_hour <= 23, "End hour must be between 0 and 23");
+    require(_end_hour <= 23, "End hour must be between 0 and 23");
     require(_end_minute <= 59, "End minute must be between 0 and 59");
 
     require(isApprovedOrOwner(_parking_spot_id), "Not approved to update parking spot availability times");
     permittedParkingTime[_parking_spot_id] = availabilityTimes(_start_hour, _start_minute, _end_hour, _end_minute);
 }
 
-function setParkingSpotTimezone(uint _parking_spot_id, int8 _timezone) external {
-    require(_timezone <= 12 );
+function setParkingSpotTimezone(uint _parking_spot_id, uint8 _timezone) external {
+    require(_timezone <= 23, "Timezone must be between 0 and 23");
     parkingSpotTimeZone[_parking_spot_id] = _timezone;
 }
 
