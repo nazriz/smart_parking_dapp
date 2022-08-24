@@ -1,11 +1,14 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "./libraries/BokkyPooBahsDateTimeContract.sol"
+import "./BokkyPooBahsDateTimeContract.sol";
 
 interface ParkingSpotAttributes {
     function checkSpotAvailability(uint) external view returns (bool);
-    
+    function checkSpotPermittedParkingStartTime(uint ) external view returns (uint8, uint8);
+    function checkSpotPermittedParkingEndTime(uint ) external view returns (uint8, uint8);
+
+
 }
 
 interface ParkingSpotToken {
@@ -15,6 +18,10 @@ interface ParkingSpotToken {
 }
 
 contract RequestParkingSpotToken {
+using BokkyPooBahsDateTimeLibrary for *;
+
+uint public permittedStartTimeUnix;
+
 
     mapping(address=>uint256) public depositors;
 
@@ -30,14 +37,10 @@ contract RequestParkingSpotToken {
         owner = payable(msg.sender);
     }
 
-    // Function to deposit Ether into this contract.
-    // Call this function along with some Ether.
-    // The balance of this contract will be automatically updated.
     function deposit() public payable {
         depositors[msg.sender] += msg.value;
     }
 
-    // Function to withdraw all Ether from this contract.
     function withdraw(uint256 _amount) public {
         require(_amount <= depositors[msg.sender], "Not enough ETH deposited");
         depositors[msg.sender] -= _amount;
@@ -46,7 +49,16 @@ contract RequestParkingSpotToken {
 
     }
 
-    function checkAndConvertAvailabilityTime() internal returns (bool) {
+    function checkAndConvertAvailabilityTime(uint _tokenId) external returns (uint256) {
+      
+        uint256 currentTimeUnix = block.timestamp;
+        (uint currentYear, uint currentMonth, uint currentDay, uint currentHour, 
+        uint currentMinute, uint currentSecond ) = BokkyPooBahsDateTimeLibrary.timestampToDateTime(currentTimeUnix);
+        (uint8 permittedStartHour, uint8 permittedStartMinute) = psa.checkSpotPermittedParkingStartTime(_tokenId);
+        permittedStartTimeUnix = BokkyPooBahsDateTimeLibrary.timestampFromDateTime(currentYear, currentMonth, currentDay, permittedStartHour, permittedStartMinute, currentSecond);
+
+        return permittedStartTimeUnix;
+
 
     }
 
