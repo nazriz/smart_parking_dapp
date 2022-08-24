@@ -64,6 +64,7 @@ async function main() {
   console.log("converted approved unix time:");
   await requestSpot.checkAndConvertAvailabilityTime(1);
   console.log(await requestSpot.permittedStartTimeUnix());
+  console.log(await requestSpot.permittedEndTimeUnix());
 
   // await requestSpot.connect(addr2).deposit({ value: ethers.utils.parseUnits("2", "ether") });
   // console.log("depositing 1 eth...");
