@@ -61,26 +61,24 @@ async function main() {
     )
   );
 
-  console.log("converted approved unix time:");
-  await requestSpot.checkAndConvertAvailabilityTime(1);
-  console.log(await requestSpot.permittedStartTimeUnix());
-  console.log(await requestSpot.permittedEndTimeUnix());
+  await requestSpot.getTime();
+  console.log(await requestSpot.timeRn());
 
-  // await requestSpot.connect(addr2).deposit({ value: ethers.utils.parseUnits("2", "ether") });
-  // console.log("depositing 1 eth...");
-  // console.log("Balance of RequestParkingSpot:");
-  // console.log(await provider.getBalance(requestSpot.address));
-  // console.log("mapping balance");
-  // console.log(await requestSpot.depositors(addr2.address));
+  await requestSpot.connect(addr2).deposit({ value: ethers.utils.parseUnits("2", "ether") });
+  console.log("depositing 1 eth...");
+  console.log("Balance of RequestParkingSpot:");
+  console.log(await provider.getBalance(requestSpot.address));
+  console.log("mapping balance");
+  console.log(await requestSpot.depositors(addr2.address));
 
-  // console.log("requesting token...");
-  // await requestSpot.connect(addr2).requestParkingSpotToken(1);
+  console.log("requesting token...");
+  await requestSpot.connect(addr2).requestParkingSpotToken(1);
 
-  // console.log("checking owner...");
-  // console.log(await token.ownerOf(1));
+  console.log("checking owner...");
+  console.log(await token.ownerOf(1));
 
-  // const timeStamp = (await ethers.provider.getBlock("latest")).timestamp;
-  // console.log(timeStamp);
+  const timeStamp = (await ethers.provider.getBlock("latest")).timestamp;
+  console.log(timeStamp);
 }
 
 main()

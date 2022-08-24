@@ -20,10 +20,8 @@ interface ParkingSpotToken {
 contract RequestParkingSpotToken {
 using BokkyPooBahsDateTimeLibrary for *;
 
-uint public permittedStartTimeUnix;
-uint public permittedEndTimeUnix;
-uint zero;
-
+    uint zero;
+    uint public timeRn;
 
 
     mapping(address=>uint256) public depositors;
@@ -52,25 +50,35 @@ uint zero;
 
     }
 
-    function checkAndConvertAvailabilityTime(uint _tokenId) external returns (uint256, uint256) {
+    function checkAndConvertAvailabilityTime(uint _tokenId) internal returns (uint256, uint256) {
         uint256 currentTimeUnix = block.timestamp;
         (uint currentYear, uint currentMonth, uint currentDay, uint currentHour, 
         uint currentMinute, uint currentSecond ) = BokkyPooBahsDateTimeLibrary.timestampToDateTime(currentTimeUnix);
         (uint8 permittedStartHour, uint8 permittedStartMinute) = psa.checkSpotPermittedParkingStartTime(_tokenId);
         (uint8 permittedEndHour, uint8 permittedEndMinute) = psa.checkSpotPermittedParkingEndTime(_tokenId);
 
-        permittedStartTimeUnix = BokkyPooBahsDateTimeLibrary.timestampFromDateTime(currentYear, currentMonth, currentDay, permittedStartHour, permittedStartMinute, zero);
-        permittedEndTimeUnix = BokkyPooBahsDateTimeLibrary.timestampFromDateTime(currentYear, currentMonth, currentDay, permittedEndHour, permittedEndMinute, zero);
-
+        uint permittedStartTimeUnix = BokkyPooBahsDateTimeLibrary.timestampFromDateTime(currentYear, currentMonth, currentDay, permittedStartHour, permittedStartMinute, zero);
+        uint permittedEndTimeUnix = BokkyPooBahsDateTimeLibrary.timestampFromDateTime(currentYear, currentMonth, currentDay, permittedEndHour, permittedEndMinute, zero);
 
         return (permittedStartTimeUnix, permittedEndTimeUnix);
 
 
     }
 
+    function getTime() public {
+
+        timeRn = block.timestamp; 
+    }
+
     function requestParkingSpotToken(uint256 _tokenId) public {
+        (uint parkingSpotStartTime, uint parkingSpotEndTime) = checkAndConvertAvailabilityTime(_tokenId);
+        uint256 currentTimeUnix = block.timestamp;
+
         require(depositors[msg.sender] >= 1000000000000000000, "Must deposit at least 1 Eth");
         require(psa.checkSpotAvailability(_tokenId) == true, "Parking spot is unavailable!");
+        require(block.timestamp < parkingSpotStartTime , "Parking spot unavailable at this time!");
+
+        // && block.timestamp < parkingSpotEndTime
 
         address currentOwner;
         currentOwner = pst.ownerOf(_tokenId);
@@ -79,3 +87,4 @@ uint zero;
     }
 
 }
+
