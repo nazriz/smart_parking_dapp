@@ -21,6 +21,9 @@ contract RequestParkingSpotToken {
 using BokkyPooBahsDateTimeLibrary for *;
 
 uint public permittedStartTimeUnix;
+uint public permittedEndTimeUnix;
+uint zero;
+
 
 
     mapping(address=>uint256) public depositors;
@@ -49,15 +52,18 @@ uint public permittedStartTimeUnix;
 
     }
 
-    function checkAndConvertAvailabilityTime(uint _tokenId) external returns (uint256) {
-      
+    function checkAndConvertAvailabilityTime(uint _tokenId) external returns (uint256, uint256) {
         uint256 currentTimeUnix = block.timestamp;
         (uint currentYear, uint currentMonth, uint currentDay, uint currentHour, 
         uint currentMinute, uint currentSecond ) = BokkyPooBahsDateTimeLibrary.timestampToDateTime(currentTimeUnix);
         (uint8 permittedStartHour, uint8 permittedStartMinute) = psa.checkSpotPermittedParkingStartTime(_tokenId);
-        permittedStartTimeUnix = BokkyPooBahsDateTimeLibrary.timestampFromDateTime(currentYear, currentMonth, currentDay, permittedStartHour, permittedStartMinute, currentSecond);
+        (uint8 permittedEndHour, uint8 permittedEndMinute) = psa.checkSpotPermittedParkingEndTime(_tokenId);
 
-        return permittedStartTimeUnix;
+        permittedStartTimeUnix = BokkyPooBahsDateTimeLibrary.timestampFromDateTime(currentYear, currentMonth, currentDay, permittedStartHour, permittedStartMinute, zero);
+        permittedEndTimeUnix = BokkyPooBahsDateTimeLibrary.timestampFromDateTime(currentYear, currentMonth, currentDay, permittedEndHour, permittedEndMinute, zero);
+
+
+        return (permittedStartTimeUnix, permittedEndTimeUnix);
 
 
     }
