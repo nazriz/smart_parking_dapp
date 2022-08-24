@@ -7,6 +7,7 @@ interface ParkingSpotAttributes {
     function checkSpotAvailability(uint) external view returns (bool);
     function checkSpotPermittedParkingStartTime(uint ) external view returns (uint8, uint8);
     function checkSpotPermittedParkingEndTime(uint ) external view returns (uint8, uint8);
+    function checkParkingSpotTimezone(uint ) external view returns (uint8);
 
 
 }
@@ -20,14 +21,22 @@ interface ParkingSpotToken {
 contract RequestParkingSpotToken {
 using BokkyPooBahsDateTimeLibrary for *;
 
-    uint zero;
-    uint public timeRn;
+    struct DateTime {
+        uint256 Year;
+        uint256 Month; 
+        uint256 Day;
+        uint256 Hour; 
+        uint256 Minute;
+        uint256 Second;
+    }
 
+    DateTime current = DateTime(0,0,0,0,0,0);
 
     mapping(address=>uint256) public depositors;
 
     ParkingSpotAttributes constant psa = ParkingSpotAttributes(0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9);
     ParkingSpotToken constant pst = ParkingSpotToken(0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9);
+
 
 
     // Payable address can receive Ether
@@ -49,25 +58,43 @@ using BokkyPooBahsDateTimeLibrary for *;
         require(success, "Failed to send Ether");
 
     }
+    
+    function getCurrentDateTime () internal {
+        (current.Year, current.Month, current.Day, current.Hour, current.Minute, current.Second) = BokkyPooBahsDateTimeLibrary.timestampToDateTime(block.timestamp);
+    }
 
     function checkAndConvertAvailabilityTime(uint _tokenId) internal returns (uint256, uint256) {
-        uint256 currentTimeUnix = block.timestamp;
-        (uint currentYear, uint currentMonth, uint currentDay, uint currentHour, 
-        uint currentMinute, uint currentSecond ) = BokkyPooBahsDateTimeLibrary.timestampToDateTime(currentTimeUnix);
+        //  (uint256 currentYear, uint256 currentMonth, uint256 currentDay, uint256 currentHour, 
+        // uint256 currentMinute,)= BokkyPooBahsDateTimeLibrary.timestampToDateTime(block.timestamp);
+        getCurrentDateTime();
         (uint8 permittedStartHour, uint8 permittedStartMinute) = psa.checkSpotPermittedParkingStartTime(_tokenId);
         (uint8 permittedEndHour, uint8 permittedEndMinute) = psa.checkSpotPermittedParkingEndTime(_tokenId);
 
-        uint permittedStartTimeUnix = BokkyPooBahsDateTimeLibrary.timestampFromDateTime(currentYear, currentMonth, currentDay, permittedStartHour, permittedStartMinute, zero);
-        uint permittedEndTimeUnix = BokkyPooBahsDateTimeLibrary.timestampFromDateTime(currentYear, currentMonth, currentDay, permittedEndHour, permittedEndMinute, zero);
-
+        uint permittedStartTimeUnix = BokkyPooBahsDateTimeLibrary.timestampFromDateTime(current.Year, current.Month, current.Day, permittedStartHour, permittedStartMinute, 0);
+        uint permittedEndTimeUnix = BokkyPooBahsDateTimeLibrary.timestampFromDateTime(current.Year, current.Month, current.Day, permittedEndHour, permittedEndMinute, 0);
+        (permittedEndTimeUnix, permittedEndTimeUnix) = accountForTimezone(permittedStartTimeUnix, permittedEndTimeUnix, _tokenId);
         return (permittedStartTimeUnix, permittedEndTimeUnix);
-
 
     }
 
-    function getTime() public {
+    function accountForTimezone(uint _start_time, uint _end_time, uint _tokenId) internal returns (uint256, uint256) {
+        int256 timezone = int256(int8(psa.checkParkingSpotTimezone(_tokenId)));
 
-        timeRn = block.timestamp; 
+        if (timezone > 12) {
+            timezone = timezone - 12;
+            timezone * -1;
+        }
+
+        int256 offset = timezone * 3600;
+
+      int256 _start_time_with_offset = int256(_start_time) + offset;
+      int256 _end_time_with_offset = int256(_end_time) + offset;
+
+        _start_time = uint256(_start_time_with_offset);
+        _end_time = uint256(_end_time_with_offset);
+
+        return (_start_time, _end_time);
+
     }
 
     function requestParkingSpotToken(uint256 _tokenId) public {
@@ -76,7 +103,7 @@ using BokkyPooBahsDateTimeLibrary for *;
 
         require(depositors[msg.sender] >= 1000000000000000000, "Must deposit at least 1 Eth");
         require(psa.checkSpotAvailability(_tokenId) == true, "Parking spot is unavailable!");
-        require(block.timestamp < parkingSpotStartTime , "Parking spot unavailable at this time!");
+        require(block.timestamp > parkingSpotStartTime , "Parking spot unavailable at this time!");
 
         // && block.timestamp < parkingSpotEndTime
 
