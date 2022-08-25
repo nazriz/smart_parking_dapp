@@ -103,9 +103,7 @@ using BokkyPooBahsDateTimeLibrary for *;
 
         require(depositors[msg.sender] >= 1000000000000000000, "Must deposit at least 1 Eth");
         require(psa.checkSpotAvailability(_tokenId) == true, "Parking spot is unavailable!");
-        require(block.timestamp > parkingSpotStartTime , "Parking spot unavailable at this time!");
-
-        // && block.timestamp < parkingSpotEndTime
+        require(block.timestamp > parkingSpotStartTime && block.timestamp < parkingSpotEndTime , "Parking spot unavailable at this time!");
 
         address currentOwner;
         currentOwner = pst.ownerOf(_tokenId);
