@@ -88,8 +88,8 @@
       ]
     },
     "/Users/nazimrizvic/smart_parking_dapp/contracts/RequestParkingSpotToken.sol": {
-      "lastModificationDate": 1661428189654,
-      "contentHash": "deabaa2dbda21f44a24d30c528808ff0",
+      "lastModificationDate": 1661430174658,
+      "contentHash": "9a249623263eda035618dc2a5198de27",
       "sourceName": "contracts/RequestParkingSpotToken.sol",
       "solcConfig": {
         "version": "0.8.12",

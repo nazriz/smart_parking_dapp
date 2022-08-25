@@ -68,18 +68,20 @@ using BokkyPooBahsDateTimeLibrary for *;
        return BokkyPooBahsDateTimeLibrary.timestampFromDateTime(current.Year, current.Month, current.Day, _hour, _minute, 0);
     }
 
-    function checkRequestTimeAgainstPermittedTime(uint _tokenId) internal returns (uint256, uint256) {
+    function retrievePermittedParkingTimes(uint _tokenId) internal returns (uint256, uint256) {
         (uint8 permittedStartHour, uint8 permittedStartMinute) = psa.checkSpotPermittedParkingStartTime(_tokenId);
         (uint8 permittedEndHour, uint8 permittedEndMinute) = psa.checkSpotPermittedParkingEndTime(_tokenId);
 
         uint permittedStartTimeUnix = genericTimeFrameToCurrentUnixTime(permittedStartHour, permittedStartMinute);
         uint permittedEndTimeUnix = genericTimeFrameToCurrentUnixTime(permittedEndHour, permittedEndMinute);
-        (permittedEndTimeUnix, permittedEndTimeUnix) = accountForTimezone(permittedStartTimeUnix, permittedEndTimeUnix, _tokenId);
+        permittedStartTimeUnix = accountForTimezone(permittedStartTimeUnix, _tokenId);
+        permittedEndTimeUnix  =  accountForTimezone(permittedEndTimeUnix, _tokenId);
+
         return (permittedStartTimeUnix, permittedEndTimeUnix);
 
     }
 
-    function accountForTimezone(uint _start_time, uint _end_time, uint _tokenId) internal returns (uint256, uint256) {
+    function accountForTimezone(uint _unixTime, uint _tokenId) internal returns (uint256) {
         int256 timezone = int256(int8(psa.checkParkingSpotTimezone(_tokenId)));
 
         if (timezone > 12) {
@@ -89,24 +91,29 @@ using BokkyPooBahsDateTimeLibrary for *;
 
         int256 offset = timezone * 3600;
 
-      int256 _start_time_with_offset = int256(_start_time) + offset;
-      int256 _end_time_with_offset = int256(_end_time) + offset;
+      int256 _unixTimeWithOffset = int256(_unixTime) + offset;
+    //   int256 _end_time_with_offset = int256(_end_time) + offset;
 
-        _start_time = uint256(_start_time_with_offset);
-        _end_time = uint256(_end_time_with_offset);
+        _unixTime = uint256(_unixTimeWithOffset);
+        // _end_time = uint256(_end_time_with_offset);
 
-        return (_start_time, _end_time);
+        return _unixTime;
 
     }
 
-    function requestParkingSpotToken(uint256 _tokenId) public {
-        // require(_requestStartTime > );
-        (uint parkingSpotStartTime, uint parkingSpotEndTime) = checkAndConvertAvailabilityTime(_tokenId);
-        uint256 currentTimeUnix = block.timestamp;
+    function requestParkingSpotToken(uint256 _tokenId, uint8 _requestedStartHour, uint8 _requestedStartMinute, uint8 _requestedEndHour, uint8 _requestedEndMinute) public {
+        require(_requestedStartHour <= 23, "Start hour must be between 0 and 23");
+        require(_requestedStartMinute <= 59, "Start minute must be between 0 and 59");
+        require(_requestedEndHour <= 23, "End hour must be between 0 and 23");
+        require(_requestedEndMinute <= 59, "End minute must be between 0 and 59");
 
+        (uint parkingSpotStartTime, uint parkingSpotEndTime) = retrievePermittedParkingTimes(_tokenId);
+        uint256 requestedStartTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedStartHour,_requestedStartMinute), _tokenId);
+        uint256 requestedEndTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedEndHour,_requestedEndMinute), _tokenId);
+        require(requestedStartTimeUnix > block.timestamp, "Can't request parking spot in the past!");
         require(depositors[msg.sender] >= 1000000000000000000, "Must deposit at least 1 Eth");
         require(psa.checkSpotAvailability(_tokenId) == true, "Parking spot is unavailable!");
-        require(block.timestamp > parkingSpotStartTime && block.timestamp < parkingSpotEndTime , "Parking spot unavailable at this time!");
+        require(requestedStartTimeUnix > parkingSpotStartTime && requestedEndTimeUnix < parkingSpotEndTime , "Parking spot unavailable at this time!");
 
         address currentOwner;
         currentOwner = pst.ownerOf(_tokenId);

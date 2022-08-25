@@ -74,7 +74,7 @@ async function main() {
   console.log(await requestSpot.depositors(addr2.address));
 
   console.log("requesting token...");
-  await requestSpot.connect(addr2).requestParkingSpotToken(1);
+  await requestSpot.connect(addr2).requestParkingSpotToken(1, 22, 30, 22, 45);
 
   console.log("checking owner...");
   console.log(await token.ownerOf(1));
