@@ -63,15 +63,17 @@ using BokkyPooBahsDateTimeLibrary for *;
         (current.Year, current.Month, current.Day, current.Hour, current.Minute, current.Second) = BokkyPooBahsDateTimeLibrary.timestampToDateTime(block.timestamp);
     }
 
-    function checkAndConvertAvailabilityTime(uint _tokenId) internal returns (uint256, uint256) {
-        //  (uint256 currentYear, uint256 currentMonth, uint256 currentDay, uint256 currentHour, 
-        // uint256 currentMinute,)= BokkyPooBahsDateTimeLibrary.timestampToDateTime(block.timestamp);
+    function genericTimeFrameToCurrentUnixTime(uint8 _hour, uint8 _minute) internal returns (uint) {
         getCurrentDateTime();
+       return BokkyPooBahsDateTimeLibrary.timestampFromDateTime(current.Year, current.Month, current.Day, _hour, _minute, 0);
+    }
+
+    function checkRequestTimeAgainstPermittedTime(uint _tokenId) internal returns (uint256, uint256) {
         (uint8 permittedStartHour, uint8 permittedStartMinute) = psa.checkSpotPermittedParkingStartTime(_tokenId);
         (uint8 permittedEndHour, uint8 permittedEndMinute) = psa.checkSpotPermittedParkingEndTime(_tokenId);
 
-        uint permittedStartTimeUnix = BokkyPooBahsDateTimeLibrary.timestampFromDateTime(current.Year, current.Month, current.Day, permittedStartHour, permittedStartMinute, 0);
-        uint permittedEndTimeUnix = BokkyPooBahsDateTimeLibrary.timestampFromDateTime(current.Year, current.Month, current.Day, permittedEndHour, permittedEndMinute, 0);
+        uint permittedStartTimeUnix = genericTimeFrameToCurrentUnixTime(permittedStartHour, permittedStartMinute);
+        uint permittedEndTimeUnix = genericTimeFrameToCurrentUnixTime(permittedEndHour, permittedEndMinute);
         (permittedEndTimeUnix, permittedEndTimeUnix) = accountForTimezone(permittedStartTimeUnix, permittedEndTimeUnix, _tokenId);
         return (permittedStartTimeUnix, permittedEndTimeUnix);
 
@@ -98,6 +100,7 @@ using BokkyPooBahsDateTimeLibrary for *;
     }
 
     function requestParkingSpotToken(uint256 _tokenId) public {
+        // require(_requestStartTime > );
         (uint parkingSpotStartTime, uint parkingSpotEndTime) = checkAndConvertAvailabilityTime(_tokenId);
         uint256 currentTimeUnix = block.timestamp;
 
