@@ -9,7 +9,6 @@ interface ParkingSpotAttributes {
     function checkSpotPermittedParkingEndTime(uint ) external view returns (uint8, uint8);
     function checkParkingSpotTimezone(uint ) external view returns (uint8);
 
-
 }
 
 interface ParkingSpotToken {
@@ -33,6 +32,7 @@ using BokkyPooBahsDateTimeLibrary for *;
     DateTime current = DateTime(0,0,0,0,0,0);
 
     mapping(address=>uint256) public depositors;
+    mapping(uint256=>bool) public spotInUse;
 
     ParkingSpotAttributes constant psa = ParkingSpotAttributes(0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9);
     ParkingSpotToken constant pst = ParkingSpotToken(0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9);
@@ -92,10 +92,8 @@ using BokkyPooBahsDateTimeLibrary for *;
         int256 offset = timezone * 3600;
 
       int256 _unixTimeWithOffset = int256(_unixTime) + offset;
-    //   int256 _end_time_with_offset = int256(_end_time) + offset;
 
         _unixTime = uint256(_unixTimeWithOffset);
-        // _end_time = uint256(_end_time_with_offset);
 
         return _unixTime;
 
@@ -106,6 +104,7 @@ using BokkyPooBahsDateTimeLibrary for *;
         require(_requestedStartMinute <= 59, "Start minute must be between 0 and 59");
         require(_requestedEndHour <= 23, "End hour must be between 0 and 23");
         require(_requestedEndMinute <= 59, "End minute must be between 0 and 59");
+        require(spotInUse[_tokenId] = false);
 
         (uint parkingSpotStartTime, uint parkingSpotEndTime) = retrievePermittedParkingTimes(_tokenId);
         uint256 requestedStartTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedStartHour,_requestedStartMinute), _tokenId);
@@ -118,6 +117,7 @@ using BokkyPooBahsDateTimeLibrary for *;
         address currentOwner;
         currentOwner = pst.ownerOf(_tokenId);
         pst.safeTransferFrom(currentOwner, msg.sender, _tokenId);
+        spotInUse[_tokenId] = true;
 
     }
 
