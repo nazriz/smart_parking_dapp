@@ -6,7 +6,7 @@ const { deployer } = getNamedAccounts();
 
 async function main() {
   const provider = ethers.provider;
-  const [addr1, addr2] = await ethers.getSigners();
+  const [addr1, addr2, addr3] = await ethers.getSigners();
   const offchain = await (
     await ethers.getContractFactory("contracts/OffchainParkingDataResponse.sol:OffchainParkingDataResponse")
   ).attach("0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
@@ -23,43 +23,54 @@ async function main() {
 
   // Mint Token from addr1
   console.log("Requesting fake bytes....");
-  await offchain.fakeFulfillBytes();
+  await offchain.connect(addr1).fakeFulfillBytes();
   console.log("done!");
   console.log("Minting parking spot token...");
-  await token.mintParkingSpot("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", 0);
+  await token.mintParkingSpot(addr1.address, 0);
   console.log("minted!");
   console.log("checking owner...");
   console.log(await token.ownerOf(1));
   console.log("Current availability:");
   console.log(await attributes.checkSpotAvailability(1));
-  console.log("approved for request contract:");
-  console.log(
-    await token.isApprovedForAll(
-      "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-      "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
-    )
-  );
-  console.log("Approving request contract...");
-  await token.setApprovalForAll("0x5FC8d32690cc91D4c39d9d3abcBD16989F875707", true);
+
+  console.log("Setting availability....");
+  await attributes.setSpotAvailability(1, 1);
+
+  // console.log("Transferring to addr2...");
+  // await token.safeTransferFromWithOwnerApprovals("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", addr2.address, 1);
+  // console.log("transferred");
+
+  // console.log("Checking token owner");
+  // console.log(await token.ownerOf(1));
+  // console.log("approved for request contract:");
+  // console.log(
+  //   await token.isApprovedForAll(
+  //     "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  //     "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
+  //   )
+  // );
+
+  //========
   console.log("Setting availability....");
   await attributes.setSpotAvailability(1, 1);
   console.log("Current availability:");
   console.log(await attributes.checkSpotAvailability(1));
 
   console.log("Setting start time 0900, end time 1700");
-  await attributes.setSpotPermittedParkingTime(1, 09, 00, 23, 00);
+  await attributes.connect(addr1).setSpotPermittedParkingTime(1, 09, 00, 23, 00);
   console.log("onchain start time:");
   console.log(await attributes.checkSpotPermittedParkingStartTime(1));
   console.log("onchain end time:");
   console.log(await attributes.checkSpotPermittedParkingEndTime(1));
 
+  console.log("Parking spot owners map");
+  console.log(await token._parkingSpotOwners(1));
+
+  console.log("Approving for request contract...");
+  await token.connect(addr1).setApprovalForRequestContract(1, "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707", true);
+
   console.log("approved for request contract:");
-  console.log(
-    await token.isApprovedForAll(
-      "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-      "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
-    )
-  );
+  console.log(await token.isApprovedForRequestContract(1, "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"));
 
   console.log("setting parking spot timezone... ");
   await attributes.setParkingSpotTimezone(1, 10);
@@ -74,7 +85,22 @@ async function main() {
   console.log(await requestSpot.depositors(addr2.address));
 
   console.log("requesting token...");
-  await requestSpot.connect(addr2).requestParkingSpotToken(1, 22, 30, 22, 45);
+  await requestSpot.connect(addr2).requestParkingSpotToken(1, 13, 30, 16, 30);
+
+  console.log("checking owner...");
+  console.log(await token.ownerOf(1));
+
+  console.log("approved for request contract:");
+  console.log(await token.isApprovedForRequestContract(1, "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"));
+
+  // =========
+
+  console.log("attempting to return token...");
+  console.log(await requestSpot.returnParkingSpotToken(1));
+
+  console.log("requesting spot 1 (addr2) from addr3...");
+  await requestSpot.connect(addr3).deposit({ value: ethers.utils.parseUnits("2", "ether") });
+  await requestSpot.connect(addr3).requestParkingSpotToken(1, 15, 30, 16, 30);
 
   console.log("checking owner...");
   console.log(await token.ownerOf(1));

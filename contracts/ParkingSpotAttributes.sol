@@ -19,7 +19,10 @@ struct availabilityTimes {
 mapping(uint => bool) public spot_available;
 mapping(uint=> availabilityTimes) public permittedParkingTime;
 mapping(uint=> uint8) public parkingSpotTimeZone;
+mapping(uint256=>bool) public spotInUse;
 
+// Need to make this only owner
+address requestParkingSpotTokenAddress;
 
 
 // Interface address is for local network, must be updated for network deployed to.
@@ -32,6 +35,7 @@ function isApprovedOrOwner(uint _parking_spot_id) internal view returns (bool) {
 function setSpotAvailability(uint _parking_spot_id, bool _availability) external {
     require(isApprovedOrOwner(_parking_spot_id), "Not approved to update parking spot Availability"); 
     spot_available[_parking_spot_id] = _availability;
+    spotInUse[_parking_spot_id] = false;
 }
 
 function setSpotPermittedParkingTime(uint _parking_spot_id, uint8 _start_hour, uint8 _start_minute, uint8 _end_hour, uint8 _end_minute) external {
@@ -47,6 +51,16 @@ function setSpotPermittedParkingTime(uint _parking_spot_id, uint8 _start_hour, u
 function setParkingSpotTimezone(uint _parking_spot_id, uint8 _timezone) external {
     require(_timezone <= 23, "Timezone must be between 0 and 23");
     parkingSpotTimeZone[_parking_spot_id] = _timezone;
+}
+
+function setSpotInUse(uint _tokenId, bool _inUse) external {
+
+    spotInUse[_tokenId] = _inUse;
+}
+
+//make this only owner
+function setRequestParkingSpotTokenAddress (address _requestParkingSpotTokenAddress) public {
+    requestParkingSpotTokenAddress = _requestParkingSpotTokenAddress;
 }
 
 function checkSpotAvailability(uint _parking_spot_id) public view returns (bool) {

@@ -8,12 +8,17 @@ interface ParkingSpotAttributes {
     function checkSpotPermittedParkingStartTime(uint ) external view returns (uint8, uint8);
     function checkSpotPermittedParkingEndTime(uint ) external view returns (uint8, uint8);
     function checkParkingSpotTimezone(uint ) external view returns (uint8);
+    function spotInUse(uint) external view returns (bool);
+    function setSpotInUse(uint, bool ) external;
+
 
 }
 
 interface ParkingSpotToken {
     function ownerOf(uint256) external returns (address);
     function safeTransferFrom(address,address,uint256) external;
+    function safeTransferFromWithOwnerApprovals(address,address,uint256) external;
+
 
 }
 
@@ -32,7 +37,9 @@ using BokkyPooBahsDateTimeLibrary for *;
     DateTime current = DateTime(0,0,0,0,0,0);
 
     mapping(address=>uint256) public depositors;
-    mapping(uint256=>bool) public spotInUse;
+    mapping(uint256=> address) public parkingSpotOwner;
+    mapping(uint256=>uint256[2]) public permittedParkingTimes;
+    mapping(uint256=>uint256[2]) public requestedParkingTimes;
 
     ParkingSpotAttributes constant psa = ParkingSpotAttributes(0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9);
     ParkingSpotToken constant pst = ParkingSpotToken(0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9);
@@ -77,6 +84,8 @@ using BokkyPooBahsDateTimeLibrary for *;
         permittedStartTimeUnix = accountForTimezone(permittedStartTimeUnix, _tokenId);
         permittedEndTimeUnix  =  accountForTimezone(permittedEndTimeUnix, _tokenId);
 
+        permittedParkingTimes[_tokenId] = [permittedStartTimeUnix, permittedEndTimeUnix];
+
         return (permittedStartTimeUnix, permittedEndTimeUnix);
 
     }
@@ -104,9 +113,10 @@ using BokkyPooBahsDateTimeLibrary for *;
         require(_requestedStartMinute <= 59, "Start minute must be between 0 and 59");
         require(_requestedEndHour <= 23, "End hour must be between 0 and 23");
         require(_requestedEndMinute <= 59, "End minute must be between 0 and 59");
-        require(spotInUse[_tokenId] = false);
+        require(psa.spotInUse(_tokenId) == false, "Parking spot currently in use!");
 
         (uint parkingSpotStartTime, uint parkingSpotEndTime) = retrievePermittedParkingTimes(_tokenId);
+
         uint256 requestedStartTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedStartHour,_requestedStartMinute), _tokenId);
         uint256 requestedEndTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedEndHour,_requestedEndMinute), _tokenId);
         require(requestedStartTimeUnix > block.timestamp, "Can't request parking spot in the past!");
@@ -114,12 +124,42 @@ using BokkyPooBahsDateTimeLibrary for *;
         require(psa.checkSpotAvailability(_tokenId) == true, "Parking spot is unavailable!");
         require(requestedStartTimeUnix > parkingSpotStartTime && requestedEndTimeUnix < parkingSpotEndTime , "Parking spot unavailable at this time!");
 
-        address currentOwner;
-        currentOwner = pst.ownerOf(_tokenId);
+     
+       address currentOwner = pst.ownerOf(_tokenId);
+        parkingSpotOwner[_tokenId] = currentOwner;
         pst.safeTransferFrom(currentOwner, msg.sender, _tokenId);
-        spotInUse[_tokenId] = true;
+        psa.setSpotInUse(_tokenId, true);
+        requestedParkingTimes[_tokenId] = [requestedStartTimeUnix, requestedEndTimeUnix ];
 
     }
+
+    function returnParkingSpotToken(uint256 _tokenId) public returns (bool) {
+        // require( > block.timestamp, "Parking session has not ended!");
+
+        uint256 parkingEndtimeUnix = requestedParkingTimes[_tokenId][1];
+
+        if (parkingEndtimeUnix == 0) {
+            if (block.timestamp >= permittedParkingTimes[_tokenId][1]) {
+                address currentUser = pst.ownerOf(_tokenId);
+                pst.safeTransferFrom(currentUser, parkingSpotOwner[_tokenId], _tokenId);
+                psa.setSpotInUse(_tokenId, false);
+                return true;
+
+            } else {
+                return false;
+            } 
+        } else if (parkingEndtimeUnix >= block.timestamp) {
+                address currentUser = pst.ownerOf(_tokenId);
+                pst.safeTransferFrom(currentUser, parkingSpotOwner[_tokenId], _tokenId);
+                psa.setSpotInUse(_tokenId, false);
+                return true;
+            } else {
+                return false;
+    }
+
+        return false;
+
+}
 
 }
 
