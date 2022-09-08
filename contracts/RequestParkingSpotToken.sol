@@ -7,7 +7,7 @@ interface ParkingSpotAttributes {
     function checkSpotAvailability(uint) external view returns (bool);
     function checkSpotPermittedParkingStartTime(uint ) external view returns (uint8, uint8);
     function checkSpotPermittedParkingEndTime(uint ) external view returns (uint8, uint8);
-    function checkParkingSpotTimezone(uint ) external view returns (uint8);
+    function checkParkingSpotTimezone(uint ) external view returns (uint8[2] memory);
     function spotInUse(uint) external view returns (bool);
     function setSpotInUse(uint, bool ) external;
 
@@ -41,9 +41,9 @@ using BokkyPooBahsDateTimeLibrary for *;
     mapping(uint256=>uint256[2]) public permittedParkingTimes;
     mapping(uint256=>uint256[2]) public requestedParkingTimes;
 
+
     ParkingSpotAttributes constant psa = ParkingSpotAttributes(0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9);
     ParkingSpotToken constant pst = ParkingSpotToken(0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9);
-
 
 
     // Payable address can receive Ether
@@ -79,10 +79,10 @@ using BokkyPooBahsDateTimeLibrary for *;
         (uint8 permittedStartHour, uint8 permittedStartMinute) = psa.checkSpotPermittedParkingStartTime(_tokenId);
         (uint8 permittedEndHour, uint8 permittedEndMinute) = psa.checkSpotPermittedParkingEndTime(_tokenId);
 
-        uint permittedStartTimeUnix = genericTimeFrameToCurrentUnixTime(permittedStartHour, permittedStartMinute);
-        uint permittedEndTimeUnix = genericTimeFrameToCurrentUnixTime(permittedEndHour, permittedEndMinute);
-        permittedStartTimeUnix = accountForTimezone(permittedStartTimeUnix, _tokenId);
-        permittedEndTimeUnix  =  accountForTimezone(permittedEndTimeUnix, _tokenId);
+        uint permittedStartTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(permittedStartHour, permittedStartMinute), _tokenId);
+        uint permittedEndTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(permittedEndHour, permittedEndMinute), _tokenId);
+        // permittedStartTimeUnix = accountForTimezone(permittedStartTimeUnix, _tokenId);
+        // permittedEndTimeUnix  =  accountForTimezone(permittedEndTimeUnix, _tokenId);
 
         permittedParkingTimes[_tokenId] = [permittedStartTimeUnix, permittedEndTimeUnix];
 
@@ -90,21 +90,22 @@ using BokkyPooBahsDateTimeLibrary for *;
 
     }
 
-    function accountForTimezone(uint _unixTime, uint _tokenId) internal returns (uint256) {
-        int256 timezone = int256(int8(psa.checkParkingSpotTimezone(_tokenId)));
+    function setIsNegative(bool _isNegative) internal {
+        _isNegative = true;
+    }
 
-        if (timezone > 12) {
-            timezone = timezone - 12;
-            timezone * -1;
+    function accountForTimezone(uint _unixTime, uint _tokenId) internal returns (uint256) {
+        uint8[2] memory timezoneAttributes  = (psa.checkParkingSpotTimezone(_tokenId));    
+        uint256 offset = (timezoneAttributes[1] * 3600);
+        uint256 newTime;
+        if (timezoneAttributes[0] == 1) {
+         newTime = (_unixTime - offset);
+
+        } else {
+        newTime = (_unixTime + offset);
         }
 
-        int256 offset = timezone * 3600;
-
-      int256 _unixTimeWithOffset = int256(_unixTime) + offset;
-
-        _unixTime = uint256(_unixTimeWithOffset);
-
-        return _unixTime;
+        return newTime;
 
     }
 
@@ -119,8 +120,10 @@ using BokkyPooBahsDateTimeLibrary for *;
 
         uint256 requestedStartTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedStartHour,_requestedStartMinute), _tokenId);
         uint256 requestedEndTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedEndHour,_requestedEndMinute), _tokenId);
-        require(requestedStartTimeUnix > block.timestamp, "Can't request parking spot in the past!");
-        require(depositors[msg.sender] >= 1000000000000000000, "Must deposit at least 1 Eth");
+        // require(requestedStartTimeUnix > block.timestamp, "Can't request parking spot in the past!");
+        // require(depositors[msg.sender] >= 1000000000000000000, "Must deposit at least 1 Eth");
+        require(depositors[msg.sender] >= 10000000000000000, "Must deposit at least 0.01 Eth");
+
         require(psa.checkSpotAvailability(_tokenId) == true, "Parking spot is unavailable!");
         require(requestedStartTimeUnix > parkingSpotStartTime && requestedEndTimeUnix < parkingSpotEndTime , "Parking spot unavailable at this time!");
 
@@ -134,30 +137,31 @@ using BokkyPooBahsDateTimeLibrary for *;
     }
 
     function returnParkingSpotToken(uint256 _tokenId) public returns (bool) {
-        // require( > block.timestamp, "Parking session has not ended!");
 
         uint256 parkingEndtimeUnix = requestedParkingTimes[_tokenId][1];
 
-        if (parkingEndtimeUnix == 0) {
-            if (block.timestamp >= permittedParkingTimes[_tokenId][1]) {
+        if (parkingEndtimeUnix >= block.timestamp) {
                 address currentUser = pst.ownerOf(_tokenId);
                 pst.safeTransferFrom(currentUser, parkingSpotOwner[_tokenId], _tokenId);
                 psa.setSpotInUse(_tokenId, false);
                 return true;
 
             } else {
-                return false;
-            } 
-        } else if (parkingEndtimeUnix >= block.timestamp) {
-                address currentUser = pst.ownerOf(_tokenId);
-                pst.safeTransferFrom(currentUser, parkingSpotOwner[_tokenId], _tokenId);
-                psa.setSpotInUse(_tokenId, false);
-                return true;
-            } else {
-                return false;
-    }
+                revert("Session has is not over!");
 
-        return false;
+    //         } 
+    //     } else if (parkingEndtimeUnix == 0) {
+    //             address currentUser = pst.ownerOf(_tokenId);
+    //             pst.safeTransferFrom(currentUser, parkingSpotOwner[_tokenId], _tokenId);
+    //             psa.setSpotInUse(_tokenId, false);
+    //             return true;
+    //         } else {
+    //             revert("Session has is not over!");
+    // }
+
+        revert("Session has is not over!");
+
+            }
 
 }
 
