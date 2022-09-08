@@ -25,6 +25,9 @@ contract ParkingSpotToken is ERC721URIStorage {
     OffchainParkingDataResponse constant opdr = OffchainParkingDataResponse(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
 
 
+    
+
+
     function confirmNotMinted(bytes32 _parkingSpot) internal view returns (bool) {
         return spotTokenised[_parkingSpot];
     }
