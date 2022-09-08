@@ -13,6 +13,7 @@ interface OffchainParkingDataResponse {
 contract ParkingSpotToken is ERC721URIStorage {
 
     mapping(bytes32=>bool) public spotTokenised;
+    mapping(uint256=>address) public paymentAddress;
 
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
@@ -25,7 +26,6 @@ contract ParkingSpotToken is ERC721URIStorage {
     OffchainParkingDataResponse constant opdr = OffchainParkingDataResponse(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
 
 
-    
 
 
     function confirmNotMinted(bytes32 _parkingSpot) internal view returns (bool) {
@@ -50,8 +50,20 @@ contract ParkingSpotToken is ERC721URIStorage {
         return finalTokenURI;
     }
 
+    function _setPaymentAddress(address _paymentAddr, uint256 _tokenId) internal {
+        paymentAddress[_tokenId] = _paymentAddr;
 
-    function mintParkingSpot(address user, uint16 _index) public returns (uint256) {
+
+    }
+
+    function setPaymentAddress(address _paymentAddr, uint256 _tokenId) public {
+        require(_parkingSpotOwners[_tokenId] == msg.sender, "Only the true parking spot owner can change the payment address!");
+        paymentAddress[_tokenId] = _paymentAddr;
+
+    }
+
+
+    function _mintParkingSpot(address user, uint16 _index) internal returns (uint256) {
         _tokenIds.increment();
 
         string memory tokenURI = prepareData(_index);
@@ -63,57 +75,12 @@ contract ParkingSpotToken is ERC721URIStorage {
         return newItemId;
     }
 
-    // function safeTransferFromWithOwnerApprovals(
-    //     address from,
-    //     address to,
-    //     uint256 tokenId
-    // ) public virtual {
-    //     require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: caller is not token owner or approved");
-    //     _safeTransferWithOwnerApprovals(from, to, tokenId, "0x");
-    // }
+    function mintParkingSpot(address _user, uint16 _index) public returns (uint256) {
+        uint256 tokenId = _mintParkingSpot(_user, _index);
+        _setPaymentAddress(_user, tokenId);
+        return tokenId;
 
-    // function _safeTransferWithOwnerApprovals(
-    //     address from,
-    //     address to,
-    //     uint256 tokenId,
-    //     bytes memory data
-    // ) internal virtual {
-    //     _transferWithOwnerApprovals(from, to, tokenId);
-    //     require(_checkOnERC721Received(from, to, tokenId, data), "ERC721: transfer to non ERC721Receiver implementer");
-    // }
-
-    // function _transferWithOwnerApprovals(
-    //     address from,
-    //     address to,
-    //     uint256 tokenId
-    // ) internal virtual {
-    //     require(ERC721.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
-    //     require(to != address(0), "ERC721: transfer to the zero address");
-
-    //     _beforeTokenTransfer(from, to, tokenId);
-
-    //     // Check that tokenId was not transferred by `_beforeTokenTransfer` hook
-    //     require(ERC721.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
-
-    //     // Clear approvals from the previous owner
-    //     // delete _tokenApprovals[tokenId];
-
-    //     unchecked {
-    //         // `_balances[from]` cannot overflow for the same reason as described in `_burn`:
-    //         // `from`'s balance is the number of token held, which is at least one before the current
-    //         // transfer.
-    //         // `_balances[to]` could overflow in the conditions described in `_mint`. That would require
-    //         // all 2**256 token ids to be minted, which in practice is impossible.
-    //         _balances[from] -= 1;
-    //         _balances[to] += 1;
-    //     }
-    //     _owners[tokenId] = to;
-    //     _parkingSpotOwners[tokenId] = to;
-
-    //     emit Transfer(from, to, tokenId);
-
-    //     _afterTokenTransfer(from, to, tokenId);
-    // }
+    }
 
     function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual override returns (bool) {
         address owner = ERC721.ownerOf(tokenId);
