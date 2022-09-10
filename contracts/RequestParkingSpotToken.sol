@@ -2,6 +2,7 @@
 pragma solidity ^0.8.7;
 
 import "./BokkyPooBahsDateTimeContract.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 interface ParkingSpotAttributes {
     function checkSpotAvailability(uint) external view returns (bool);
@@ -10,6 +11,7 @@ interface ParkingSpotAttributes {
     function checkParkingSpotTimezone(uint ) external view returns (uint8[2] memory);
     function spotInUse(uint) external view returns (bool);
     function setSpotInUse(uint, bool ) external;
+    function pricePerHour(uint) external view returns (int);
 
 
 }
@@ -21,6 +23,8 @@ interface ParkingSpotToken {
 
 
 }
+
+
 
 contract RequestParkingSpotToken {
 using BokkyPooBahsDateTimeLibrary for *;
@@ -41,6 +45,13 @@ using BokkyPooBahsDateTimeLibrary for *;
     mapping(uint256=>uint256[2]) public permittedParkingTimes;
     mapping(uint256=>uint256[2]) public requestedParkingTimes;
 
+    uint256 public endTimeTrue;
+    uint256 public parkingEndTimeCheck;
+    uint256 public parkingTimeStampCheck;
+
+    AggregatorV3Interface internal ethUSDpriceFeed;
+
+
 
     ParkingSpotAttributes constant psa = ParkingSpotAttributes(0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9);
     ParkingSpotToken constant pst = ParkingSpotToken(0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9);
@@ -52,6 +63,7 @@ using BokkyPooBahsDateTimeLibrary for *;
     // Payable constructor can receive Ether
     constructor() payable {
         owner = payable(msg.sender);
+        ethUSDpriceFeed = AggregatorV3Interface(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
     }
 
     function deposit() public payable {
@@ -127,7 +139,6 @@ using BokkyPooBahsDateTimeLibrary for *;
         require(psa.checkSpotAvailability(_tokenId) == true, "Parking spot is unavailable!");
         require(requestedStartTimeUnix > parkingSpotStartTime && requestedEndTimeUnix < parkingSpotEndTime , "Parking spot unavailable at this time!");
 
-     
        address currentOwner = pst.ownerOf(_tokenId);
         parkingSpotOwner[_tokenId] = currentOwner;
         pst.safeTransferFrom(currentOwner, msg.sender, _tokenId);
@@ -136,19 +147,23 @@ using BokkyPooBahsDateTimeLibrary for *;
 
     }
 
+    // function endParkingSession(uint256 _tokenId) public returns (bool) {
+    //     require(msg.sender == pst.ownerOf(_tokenId);)
+
+    // }
+
     function returnParkingSpotToken(uint256 _tokenId) public returns (bool) {
 
         uint256 parkingEndtimeUnix = requestedParkingTimes[_tokenId][1];
 
-        if (parkingEndtimeUnix >= block.timestamp) {
-                address currentUser = pst.ownerOf(_tokenId);
+        if (block.timestamp >= parkingEndtimeUnix) {
+            address currentUser = pst.ownerOf(_tokenId);
                 pst.safeTransferFrom(currentUser, parkingSpotOwner[_tokenId], _tokenId);
                 psa.setSpotInUse(_tokenId, false);
                 return true;
-
             } else {
-                revert("Session has is not over!");
-
+                revert("Session is not over!");
+                
     //         } 
     //     } else if (parkingEndtimeUnix == 0) {
     //             address currentUser = pst.ownerOf(_tokenId);
@@ -159,11 +174,22 @@ using BokkyPooBahsDateTimeLibrary for *;
     //             revert("Session has is not over!");
     // }
 
-        revert("Session has is not over!");
+        revert("Session is not over!");
 
             }
 
 }
+
+function getLatestPrice() public view returns (int) {
+        (
+            /*uint80 roundID*/,
+            int price,
+            /*uint startedAt*/,
+            /*uint timeStamp*/,
+            /*uint80 answeredInRound*/
+        ) = ethUSDpriceFeed.latestRoundData();
+        return price;
+    }
 
 }
 
