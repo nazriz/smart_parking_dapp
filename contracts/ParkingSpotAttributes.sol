@@ -18,8 +18,9 @@ struct availabilityTimes {
 
 mapping(uint => bool) public spot_available;
 mapping(uint=> availabilityTimes) public permittedParkingTime;
-mapping(uint=> uint8) public parkingSpotTimeZone;
+mapping(uint=> uint8[2]) public parkingSpotTimeZone;
 mapping(uint256=>bool) public spotInUse;
+mapping(uint256=>uint256) public pricePerHour;
 
 // Need to make this only owner
 address requestParkingSpotTokenAddress;
@@ -27,6 +28,7 @@ address requestParkingSpotTokenAddress;
 
 // Interface address is for local network, must be updated for network deployed to.
 ParkingSpotToken constant pst = ParkingSpotToken(0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9);
+
 
 function isApprovedOrOwner(uint _parking_spot_id) internal view returns (bool) {
         return pst.ownerOf(_parking_spot_id) == msg.sender;
@@ -48,9 +50,9 @@ function setSpotPermittedParkingTime(uint _parking_spot_id, uint8 _start_hour, u
     permittedParkingTime[_parking_spot_id] = availabilityTimes(_start_hour, _start_minute, _end_hour, _end_minute);
 }
 
-function setParkingSpotTimezone(uint _parking_spot_id, uint8 _timezone) external {
-    require(_timezone <= 23, "Timezone must be between 0 and 23");
-    parkingSpotTimeZone[_parking_spot_id] = _timezone;
+function setParkingSpotTimezone(uint _parking_spot_id, uint8 _isNegative, uint8 _timezone) external {
+    require(_timezone <= 14 && _isNegative == 0 || _timezone <= 11 && _isNegative == 1 , "Please input a valid timezone");
+    parkingSpotTimeZone[_parking_spot_id] = [_isNegative, _timezone];
 }
 
 function setSpotInUse(uint _tokenId, bool _inUse) external {
@@ -61,6 +63,12 @@ function setSpotInUse(uint _tokenId, bool _inUse) external {
 //make this only owner
 function setRequestParkingSpotTokenAddress (address _requestParkingSpotTokenAddress) public {
     requestParkingSpotTokenAddress = _requestParkingSpotTokenAddress;
+}
+
+//make this only owner
+function setPricePerHour (uint256, _tokenId, uint256 _pricePerHour) public {
+    pricePerHour[_tokenId] = _pricePerHour;
+
 }
 
 function checkSpotAvailability(uint _parking_spot_id) public view returns (bool) {
@@ -76,7 +84,7 @@ function checkSpotPermittedParkingEndTime(uint _parking_spot_id) public view ret
     availabilityTimes storage _attr = permittedParkingTime[_parking_spot_id];
     return (_attr.endHour, _attr.endMinute); 
 }
-function checkParkingSpotTimezone(uint _parking_spot_id) public view returns (uint8) {
+function checkParkingSpotTimezone(uint _parking_spot_id) public view returns (uint8[2] memory) {
     return parkingSpotTimeZone[_parking_spot_id];
 }
 
