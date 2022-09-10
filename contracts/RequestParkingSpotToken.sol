@@ -11,7 +11,7 @@ interface ParkingSpotAttributes {
     function checkParkingSpotTimezone(uint ) external view returns (uint8[2] memory);
     function spotInUse(uint) external view returns (bool);
     function setSpotInUse(uint, bool ) external;
-    function pricePerHour(uint) external view returns (int);
+    function pricePerHour(uint) external view returns (uint);
 
 
 }
@@ -49,12 +49,14 @@ using BokkyPooBahsDateTimeLibrary for *;
     uint256 public parkingEndTimeCheck;
     uint256 public parkingTimeStampCheck;
 
+     uint256 public estimatedCost;
+
     AggregatorV3Interface internal ethUSDpriceFeed;
 
 
 
-    ParkingSpotAttributes constant psa = ParkingSpotAttributes(0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9);
-    ParkingSpotToken constant pst = ParkingSpotToken(0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9);
+    ParkingSpotAttributes constant psa = ParkingSpotAttributes(0x5FC8d32690cc91D4c39d9d3abcBD16989F875707);
+    ParkingSpotToken constant pst = ParkingSpotToken(0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9);
 
 
     // Payable address can receive Ether
@@ -121,6 +123,22 @@ using BokkyPooBahsDateTimeLibrary for *;
 
     }
 
+
+
+    function estimateSessionCost(uint256 _tokenId, uint256 _startTimeUnix, uint256 _endTimeUnix) public returns (uint256)  {
+        uint256 hourlyRateUSD = (psa.pricePerHour(_tokenId) * (10**8));
+        int256 ethUSDPrice = getLatestPrice();
+        uint256 hourlyRateGwei = (1000000000000000000 / (uint256(ethUSDPrice) / hourlyRateUSD));   
+        uint256 gweiBySecond = ((hourlyRateGwei / 3600) / 10**2);
+
+        uint256 duration = (_endTimeUnix - _startTimeUnix);
+
+        estimatedCost = duration * gweiBySecond;
+       
+
+        return duration * gweiBySecond;
+    }
+
     function requestParkingSpotToken(uint256 _tokenId, uint8 _requestedStartHour, uint8 _requestedStartMinute, uint8 _requestedEndHour, uint8 _requestedEndMinute) public {
         require(_requestedStartHour <= 23, "Start hour must be between 0 and 23");
         require(_requestedStartMinute <= 59, "Start minute must be between 0 and 59");
@@ -134,6 +152,7 @@ using BokkyPooBahsDateTimeLibrary for *;
         uint256 requestedEndTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedEndHour,_requestedEndMinute), _tokenId);
         // require(requestedStartTimeUnix > block.timestamp, "Can't request parking spot in the past!");
         // require(depositors[msg.sender] >= 1000000000000000000, "Must deposit at least 1 Eth");
+
         require(depositors[msg.sender] >= 10000000000000000, "Must deposit at least 0.01 Eth");
 
         require(psa.checkSpotAvailability(_tokenId) == true, "Parking spot is unavailable!");
