@@ -41,15 +41,10 @@ using BokkyPooBahsDateTimeLibrary for *;
     DateTime current = DateTime(0,0,0,0,0,0);
 
     mapping(address=>uint256) public depositors;
-    mapping(uint256=> address) public parkingSpotOwner;
+    mapping(uint256=> address) public currentParkingSpotOwner;
     mapping(uint256=>uint256[2]) public permittedParkingTimes;
     mapping(uint256=>uint256[2]) public requestedParkingTimes;
-
-    uint256 public endTimeTrue;
-    uint256 public parkingEndTimeCheck;
-    uint256 public parkingTimeStampCheck;
-
-     uint256 public estimatedCost;
+    mapping(address=>bool) public sessionInProgress;
 
     AggregatorV3Interface internal ethUSDpriceFeed;
 
@@ -77,6 +72,7 @@ using BokkyPooBahsDateTimeLibrary for *;
         depositors[msg.sender] -= _amount;
         (bool success, ) = msg.sender.call{value: _amount}("");
         require(success, "Failed to send Ether");
+        require(sessionInProgress[msg.sender] == false, "You cannot withdraw ETH while parking session in progress. Please wait until the session is completed, or end the session manually!");
 
     }
     
@@ -108,6 +104,10 @@ using BokkyPooBahsDateTimeLibrary for *;
         _isNegative = true;
     }
 
+    function setSessionInProgress(address _address, bool _status) internal {
+        sessionInProgress[_address] = _status;
+    }
+
     function accountForTimezone(uint _unixTime, uint _tokenId) internal returns (uint256) {
         uint8[2] memory timezoneAttributes  = (psa.checkParkingSpotTimezone(_tokenId));    
         uint256 offset = (timezoneAttributes[1] * 3600);
@@ -124,7 +124,6 @@ using BokkyPooBahsDateTimeLibrary for *;
     }
 
 
-
     function estimateSessionCost(uint256 _tokenId, uint256 _startTimeUnix, uint256 _endTimeUnix) public returns (uint256)  {
         uint256 hourlyRateUSD = (psa.pricePerHour(_tokenId) * (10**8));
         int256 ethUSDPrice = getLatestPrice();
@@ -133,7 +132,6 @@ using BokkyPooBahsDateTimeLibrary for *;
 
         uint256 duration = (_endTimeUnix - _startTimeUnix);
 
-        estimatedCost = duration * gweiBySecond;
         return duration * gweiBySecond;
     }
 
@@ -152,16 +150,15 @@ using BokkyPooBahsDateTimeLibrary for *;
         // require(depositors[msg.sender] >= 1000000000000000000, "Must deposit at least 1 Eth");
         require(depositors[msg.sender] >= 10000000000000000, "Must deposit at least 0.01 Eth");
         require(depositors[msg.sender] >= estimateSessionCost(_tokenId,requestedStartTimeUnix,requestedEndTimeUnix), "You don't have enough ETH deposited to pay for your requested duration!" );
-
         require(psa.checkSpotAvailability(_tokenId) == true, "Parking spot is unavailable!");
         require(requestedStartTimeUnix > parkingSpotStartTime && requestedEndTimeUnix < parkingSpotEndTime , "Parking spot unavailable at this time!");
 
        address currentOwner = pst.ownerOf(_tokenId);
-        parkingSpotOwner[_tokenId] = currentOwner;
+        currentParkingSpotOwner[_tokenId] = currentOwner;
         pst.safeTransferFrom(currentOwner, msg.sender, _tokenId);
         psa.setSpotInUse(_tokenId, true);
         requestedParkingTimes[_tokenId] = [requestedStartTimeUnix, requestedEndTimeUnix ];
-
+        setSessionInProgress(msg.sender, true);
     }
 
     // function endParkingSession(uint256 _tokenId) public returns (bool) {
@@ -175,7 +172,7 @@ using BokkyPooBahsDateTimeLibrary for *;
 
         if (block.timestamp >= parkingEndtimeUnix) {
             address currentUser = pst.ownerOf(_tokenId);
-                pst.safeTransferFrom(currentUser, parkingSpotOwner[_tokenId], _tokenId);
+                pst.safeTransferFrom(currentUser, currentParkingSpotOwner[_tokenId], _tokenId);
                 psa.setSpotInUse(_tokenId, false);
                 return true;
             } else {
