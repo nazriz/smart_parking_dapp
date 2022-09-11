@@ -134,8 +134,6 @@ using BokkyPooBahsDateTimeLibrary for *;
         uint256 duration = (_endTimeUnix - _startTimeUnix);
 
         estimatedCost = duration * gweiBySecond;
-       
-
         return duration * gweiBySecond;
     }
 
@@ -152,8 +150,8 @@ using BokkyPooBahsDateTimeLibrary for *;
         uint256 requestedEndTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedEndHour,_requestedEndMinute), _tokenId);
         // require(requestedStartTimeUnix > block.timestamp, "Can't request parking spot in the past!");
         // require(depositors[msg.sender] >= 1000000000000000000, "Must deposit at least 1 Eth");
-
         require(depositors[msg.sender] >= 10000000000000000, "Must deposit at least 0.01 Eth");
+        require(depositors[msg.sender] >= estimateSessionCost(_tokenId,requestedStartTimeUnix,requestedEndTimeUnix), "You don't have enough ETH deposited to pay for your requested duration!" );
 
         require(psa.checkSpotAvailability(_tokenId) == true, "Parking spot is unavailable!");
         require(requestedStartTimeUnix > parkingSpotStartTime && requestedEndTimeUnix < parkingSpotEndTime , "Parking spot unavailable at this time!");
