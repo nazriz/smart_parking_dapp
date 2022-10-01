@@ -1,7 +1,7 @@
 const { getNamedAccounts, deployments, network } = require("hardhat");
 
-const DECIMALS = "18";
-const INITIAL_PRICE = "200000000000000000000";
+const DECIMALS = "8";
+const INITIAL_PRICE = "2000000000";
 
 /**
  * @dev Read more at https://docs.chain.link/docs/chainlink-vrf/
@@ -17,12 +17,12 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   if (chainId == 31337) {
     log("Local network detected! Deploying mocks...");
     const linkToken = await deploy("LinkToken", { from: deployer, log: true });
-    // await deploy("MockV3Aggregator", {
-    //   contract: "MockV3Aggregator",
-    //   from: deployer,
-    //   log: true,
-    //   args: [DECIMALS, INITIAL_PRICE],
-    // })
+    await deploy("MockV3Aggregator", {
+      contract: "MockV3Aggregator",
+      from: deployer,
+      log: true,
+      args: [DECIMALS, INITIAL_PRICE],
+    });
     // await deploy("VRFCoordinatorV2Mock", {
     //   from: deployer,
     //   log: true,

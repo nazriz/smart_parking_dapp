@@ -12,6 +12,8 @@ interface OffchainParkingDataResponse {
 }
 contract ParkingSpotToken is ERC721URIStorage {
 
+    event ParkingSpotMinted(address owner, uint256 tokenId);
+
     mapping(bytes32=>bool) public spotTokenised;
     mapping(uint256=>address) public paymentAddress;
 
@@ -23,8 +25,8 @@ contract ParkingSpotToken is ERC721URIStorage {
 
 // Interface address is for local network, must be updated for network deployed to.
 
-    OffchainParkingDataResponse constant opdr = OffchainParkingDataResponse(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
-
+    // OffchainParkingDataResponse constant opdr = OffchainParkingDataResponse(0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9);
+    OffchainParkingDataResponse constant opdr = OffchainParkingDataResponse(0x5ecA6776c44E49753CB2910e2BFB0Ca2D756F62b);
 
 
 
@@ -78,8 +80,9 @@ contract ParkingSpotToken is ERC721URIStorage {
     function mintParkingSpot(address _user, uint16 _index) public returns (uint256) {
         uint256 tokenId = _mintParkingSpot(_user, _index);
         _setPaymentAddress(_user, tokenId);
-        return tokenId;
 
+        emit ParkingSpotMinted(_user, tokenId);
+        return tokenId;
     }
 
     function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual override returns (bool) {

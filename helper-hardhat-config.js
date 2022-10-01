@@ -31,6 +31,19 @@ const networkConfig = {
     fee: "100000000000000000",
     fundAmount: "100000000000000000", // 0.1
   },
+  5: {
+    name: "goerli",
+    linkToken: "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
+    jobId: "ee2f53a42c624b699bb0a3a381a9ff7f", // THESE ARE FOR RINKEBY
+    oracle: "0xf98Cd24CF1f864DF4942165569Fc0114f866067d", // THESE ARE FOR RINKEBY
+    entranceFee: ethers.utils.parseEther("0.01"),
+    gasLane: "0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc",
+    subscriptionId: "6487",
+    callbackGasLimit: "500000",
+    interval: "30",
+    fee: "100000000000000000",
+    fundAmount: "100000000000000000", // 0.1
+  },
 };
 
 const developmentChains = ["hardhat", "localhost"];

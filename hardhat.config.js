@@ -10,6 +10,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 const DEMO_PRIVATE_KEY = process.env.DEMO_PRIVATE_KEY;
 const HARDHAT_PRIVATE_KEY_0 = process.env.HARDHAT_PRIVATE_KEY_0;
+const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL;
 
 module.exports = {
   solidity: {
@@ -55,6 +56,13 @@ module.exports = {
       accounts: [PRIVATE_KEY],
       saveDeployments: true,
       chainId: 4,
+      gas: 2100000,
+      gasPrice: 8000000000,
+    },
+    goerli: {
+      url: GOERLI_RPC_URL,
+      accounts: [PRIVATE_KEY],
+      chainId: 5,
       gas: 2100000,
       gasPrice: 8000000000,
     },

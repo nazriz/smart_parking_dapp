@@ -1,6 +1,7 @@
 const { providers } = require("ethers");
 const { getNamedAccounts, deployments, network, artifacts } = require("hardhat");
 const hre = require("hardhat");
+const { BlockList } = require("net");
 require("dotenv").config();
 const { deployer } = getNamedAccounts();
 
@@ -9,17 +10,23 @@ async function main() {
   const [addr1, addr2, addr3] = await ethers.getSigners();
   const offchain = await (
     await ethers.getContractFactory("contracts/OffchainParkingDataResponse.sol:OffchainParkingDataResponse")
-  ).attach("0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
+  ).attach("0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9");
   const token = await (
     await ethers.getContractFactory("contracts/ParkingSpotToken.sol:ParkingSpotToken")
-  ).attach("0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9");
+  ).attach("0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9");
   const attributes = await (
     await ethers.getContractFactory("contracts/ParkingSpotAttributes.sol:ParkingSpotAttributes")
-  ).attach("0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9");
+  ).attach("0x5FC8d32690cc91D4c39d9d3abcBD16989F875707");
 
   const requestSpot = await (
-    await ethers.getContractFactory("RequestParkingSpotToken")
-  ).attach("0x5FC8d32690cc91D4c39d9d3abcBD16989F875707");
+    await ethers.getContractFactory("contracts/RequestParkingSpotToken.sol:RequestParkingSpotToken")
+  ).attach("0x0165878A594ca255338adfa4d48449f69242Eb8F");
+
+  const aggV3 = await (
+    await ethers.getContractFactory("MockV3Aggregator")
+  ).attach("0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512");
+
+  // console.log(await requestSpot.getLatestPrice());
 
   // Mint Token from addr1
   console.log("Requesting fake bytes....");
@@ -35,20 +42,11 @@ async function main() {
 
   console.log("Setting availability....");
   await attributes.setSpotAvailability(1, 1);
+  console.log("Setting token rate...");
+  await attributes.setPricePerHour(1, 5);
 
-  // console.log("Transferring to addr2...");
-  // await token.safeTransferFromWithOwnerApprovals("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", addr2.address, 1);
-  // console.log("transferred");
-
-  // console.log("Checking token owner");
-  // console.log(await token.ownerOf(1));
-  // console.log("approved for request contract:");
-  // console.log(
-  //   await token.isApprovedForAll(
-  //     "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-  //     "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
-  //   )
-  // );
+  console.log("Checking token owner");
+  console.log(await token.ownerOf(1));
 
   //========
   console.log("Setting availability....");
@@ -67,43 +65,80 @@ async function main() {
   console.log(await token._parkingSpotOwners(1));
 
   console.log("Approving for request contract...");
-  await token.connect(addr1).setApprovalForRequestContract(1, "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707", true);
+  await token.connect(addr1).setApprovalForRequestContract(1, "0x0165878A594ca255338adfa4d48449f69242Eb8F", true);
 
   console.log("approved for request contract:");
-  console.log(await token.isApprovedForRequestContract(1, "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"));
+  console.log(await token.isApprovedForRequestContract(1, "0x0165878A594ca255338adfa4d48449f69242Eb8F"));
 
   console.log("setting parking spot timezone... ");
-  await attributes.setParkingSpotTimezone(1, 10);
+  await attributes.setParkingSpotTimezone(1, 1, 10);
   console.log("timezone set to:");
-  console.log(await attributes.parkingSpotTimeZone(1));
+  console.log(await attributes.parkingSpotTimeZone(1, 0));
+  console.log(await attributes.parkingSpotTimeZone(1, 1));
 
-  await requestSpot.connect(addr2).deposit({ value: ethers.utils.parseUnits("2", "ether") });
-  console.log("depositing 1 eth...");
-  console.log("Balance of RequestParkingSpot:");
-  console.log(await provider.getBalance(requestSpot.address));
-  console.log("mapping balance");
-  console.log(await requestSpot.depositors(addr2.address));
+  await requestSpot.checkAvailableSpots(1, 55555, 66666);
 
-  console.log("requesting token...");
-  await requestSpot.connect(addr2).requestParkingSpotToken(1, 13, 30, 16, 30);
+  console.log("testLoop:");
+  console.log(await requestSpot.testLoop());
 
-  console.log("checking owner...");
-  console.log(await token.ownerOf(1));
+  // await requestSpot.connect(addr2).deposit({ value: ethers.utils.parseUnits("0.03", "ether") });
+  // console.log("balance of addr1");
+  // console.log(await provider.getBalance(addr1.address));
 
-  console.log("approved for request contract:");
-  console.log(await token.isApprovedForRequestContract(1, "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"));
+  // console.log("depositing 1 eth...");
+  // console.log("Balance of RequestParkingSpot:");
+  // console.log(await provider.getBalance(requestSpot.address));
+  // console.log("mapping balance");
+  // console.log(await requestSpot.depositors(addr2.address));
+
+  // console.log("requesting token...");
+  // await requestSpot.connect(addr2).requestParkingSpotToken(1, 10, 15, 16, 30);
+
+  // console.log("checking owner...");
+  // console.log(await token.ownerOf(1));
+
+  // console.log("approved for request contract:");
+  // console.log(await token.isApprovedForRequestContract(1, "0x0165878A594ca255338adfa4d48449f69242Eb8F"));
+
+  // console.log("checking payment address");
+  // console.log(await token.paymentAddress(1));
 
   // =========
 
-  console.log("attempting to return token...");
-  console.log(await requestSpot.returnParkingSpotToken(1));
+  // console.log("permitted times");
+  // console.log(await requestSpot.permittedParkingTimes(1, 0));
+  // console.log(await requestSpot.permittedParkingTimes(1, 1));
 
-  console.log("requesting spot 1 (addr2) from addr3...");
-  await requestSpot.connect(addr3).deposit({ value: ethers.utils.parseUnits("2", "ether") });
-  await requestSpot.connect(addr3).requestParkingSpotToken(1, 15, 30, 16, 30);
+  // console.log("requested times");
+  // console.log(await requestSpot.requestedParkingTimes(1, 0));
+  // console.log(await requestSpot.requestedParkingTimes(1, 1));
 
-  console.log("checking owner...");
-  console.log(await token.ownerOf(1));
+  // console.log("checking owner...");
+  // console.log(await token.ownerOf(1));
+
+  // console.log((await ethers.provider.getBlock("latest")).timestamp);
+
+  // await ethers.provider.send("evm_mine", [1662887162]);
+
+  // console.log((await ethers.provider.getBlock("latest")).timestamp);
+
+  // console.log("attempting to return token...");
+  // await requestSpot.returnParkingSpotToken(1);
+
+  // console.log("requesting spot 1 (addr2) from addr3...");
+  // await requestSpot.connect(addr3).deposit({ value: ethers.utils.parseUnits("2", "ether") });
+  // await requestSpot.connect(addr3).requestParkingSpotToken(1, 19, 30, 20, 30);
+
+  // console.log((await ethers.provider.getBlock("latest")).timestamp);
+
+  // console.log("checking owner...");
+  // console.log(await token.ownerOf(1));
+  // console.log("balance of addr1");
+  // console.log(await provider.getBalance(addr1.address));
+  // console.log("Balance of RequestParkingSpot:");
+  // console.log(await provider.getBalance(requestSpot.address));
+
+  // await requestSpot.connect(addr2).withdraw(5000000000000);
 }
 
 main()

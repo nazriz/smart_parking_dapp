@@ -27,6 +27,8 @@ contract OffchainParkingDataResponse is ChainlinkClient, ConfirmedOwner {
     mapping(address=>bytes32[]) public parkingSpotLocationOwnerArray;
     mapping(address=>bytes32) public parkingSpotLocationOwner;
 
+    event ParkingSpotLocationOnchain(address requestor, bytes32 location);
+
 
     function requestOffchainParkingSpotData() public {
         parkingSpotRequesterAddr = msg.sender;
@@ -48,7 +50,7 @@ contract OffchainParkingDataResponse is ChainlinkClient, ConfirmedOwner {
         parking_spot_location = bytes32(data);
         parkingSpotLocationOwner[parkingSpotRequesterAddr] = bytes32(data);
         parkingSpotLocationOwnerArray[parkingSpotRequesterAddr].push(bytes32(data));
-
+        emit ParkingSpotLocationOnchain(parkingSpotRequesterAddr, parking_spot_location);
     }
 
     function fakeFulfillBytes() public {
@@ -58,6 +60,8 @@ contract OffchainParkingDataResponse is ChainlinkClient, ConfirmedOwner {
         parking_spot_location = bytes32(data);
         parkingSpotLocationOwner[msg.sender] = bytes32(data);
         parkingSpotLocationOwnerArray[msg.sender].push(bytes32(data));
+        emit ParkingSpotLocationOnchain(msg.sender, parking_spot_location);
+
 
     }
 

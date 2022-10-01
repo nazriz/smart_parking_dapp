@@ -9,6 +9,11 @@ interface ParkingSpotToken {
 
 contract ParkingSpotAttributes {
 
+    event ParkingSpotAvailable(uint256 tokenId, bool available);
+    event ParkingSpotInUse(uint256 tokenId, bool inUse);
+    event ParkingSpotPermittedTimes(uint256 tokenId, uint8 startHour, uint8 startMinute, uint8 endHour, uint8 endMinute);
+    event ParkingSpotPricePerHour(uint256 tokenId, uint256 pricePerHour);
+
 struct availabilityTimes {
     uint8 startHour;
     uint8 startMinute; 
@@ -25,9 +30,10 @@ mapping(uint256=>uint256) public pricePerHour;
 // Need to make this only owner
 address requestParkingSpotTokenAddress;
 
-
 // Interface address is for local network, must be updated for network deployed to.
-ParkingSpotToken constant pst = ParkingSpotToken(0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9);
+// ParkingSpotToken constant pst = ParkingSpotToken(0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9);
+ParkingSpotToken constant pst = ParkingSpotToken(0x7380e28aB1F6ED032671b085390194F07aBC2606);
+
 
 
 function isApprovedOrOwner(uint _parking_spot_id) internal view returns (bool) {
@@ -38,6 +44,7 @@ function setSpotAvailability(uint _parking_spot_id, bool _availability) external
     require(isApprovedOrOwner(_parking_spot_id), "Not approved to update parking spot Availability"); 
     spot_available[_parking_spot_id] = _availability;
     spotInUse[_parking_spot_id] = false;
+    emit ParkingSpotAvailable(_parking_spot_id, _availability);
 }
 
 function setSpotPermittedParkingTime(uint _parking_spot_id, uint8 _start_hour, uint8 _start_minute, uint8 _end_hour, uint8 _end_minute) external {
@@ -48,6 +55,7 @@ function setSpotPermittedParkingTime(uint _parking_spot_id, uint8 _start_hour, u
 
     require(isApprovedOrOwner(_parking_spot_id), "Not approved to update parking spot availability times");
     permittedParkingTime[_parking_spot_id] = availabilityTimes(_start_hour, _start_minute, _end_hour, _end_minute);
+    emit ParkingSpotPermittedTimes( _parking_spot_id,  _start_hour,  _start_minute,  _end_hour,  _end_minute);
 }
 
 function setParkingSpotTimezone(uint _parking_spot_id, uint8 _isNegative, uint8 _timezone) external {
@@ -58,6 +66,7 @@ function setParkingSpotTimezone(uint _parking_spot_id, uint8 _isNegative, uint8 
 function setSpotInUse(uint _tokenId, bool _inUse) external {
 
     spotInUse[_tokenId] = _inUse;
+    emit ParkingSpotInUse(_tokenId, _inUse);
 }
 
 //make this only owner
@@ -66,8 +75,9 @@ function setRequestParkingSpotTokenAddress (address _requestParkingSpotTokenAddr
 }
 
 //make this only owner
-function setPricePerHour (uint256, _tokenId, uint256 _pricePerHour) public {
+function setPricePerHour (uint256 _tokenId, uint256 _pricePerHour) public {
     pricePerHour[_tokenId] = _pricePerHour;
+    emit ParkingSpotPricePerHour(_tokenId, _pricePerHour);
 
 }
 
