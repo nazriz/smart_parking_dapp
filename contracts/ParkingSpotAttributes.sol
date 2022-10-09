@@ -11,7 +11,7 @@ contract ParkingSpotAttributes {
 
     event ParkingSpotAvailable(uint256 tokenId, bool available);
     event ParkingSpotInUse(uint256 tokenId, bool inUse);
-    event ParkingSpotPermittedTimes(uint256 tokenId, uint8 startHour, uint8 startMinute, uint8 endHour, uint8 endMinute);
+    event ParkingSpotPermittedTime(uint256 tokenId, uint8 startHour, uint8 startMinute, uint8 endHour, uint8 endMinute);
     event ParkingSpotPricePerHour(uint256 tokenId, uint256 pricePerHour);
 
 struct availabilityTimes {
@@ -31,8 +31,9 @@ mapping(uint256=>uint256) public pricePerHour;
 address requestParkingSpotTokenAddress;
 
 // Interface address is for local network, must be updated for network deployed to.
-// ParkingSpotToken constant pst = ParkingSpotToken(0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9);
-ParkingSpotToken constant pst = ParkingSpotToken(0x7380e28aB1F6ED032671b085390194F07aBC2606);
+ParkingSpotToken constant pst = ParkingSpotToken(0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9);
+//goerli:
+// ParkingSpotToken constant pst = ParkingSpotToken(0x7380e28aB1F6ED032671b085390194F07aBC2606);
 
 
 
@@ -55,7 +56,7 @@ function setSpotPermittedParkingTime(uint _parking_spot_id, uint8 _start_hour, u
 
     require(isApprovedOrOwner(_parking_spot_id), "Not approved to update parking spot availability times");
     permittedParkingTime[_parking_spot_id] = availabilityTimes(_start_hour, _start_minute, _end_hour, _end_minute);
-    emit ParkingSpotPermittedTimes( _parking_spot_id,  _start_hour,  _start_minute,  _end_hour,  _end_minute);
+    emit ParkingSpotPermittedTime( _parking_spot_id,  _start_hour,  _start_minute,  _end_hour,  _end_minute);
 }
 
 function setParkingSpotTimezone(uint _parking_spot_id, uint8 _isNegative, uint8 _timezone) external {

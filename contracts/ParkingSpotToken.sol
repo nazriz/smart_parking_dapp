@@ -25,8 +25,10 @@ contract ParkingSpotToken is ERC721URIStorage {
 
 // Interface address is for local network, must be updated for network deployed to.
 
-    // OffchainParkingDataResponse constant opdr = OffchainParkingDataResponse(0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9);
-    OffchainParkingDataResponse constant opdr = OffchainParkingDataResponse(0x5ecA6776c44E49753CB2910e2BFB0Ca2D756F62b);
+    //localhost: 
+    OffchainParkingDataResponse constant opdr = OffchainParkingDataResponse(0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9);
+    //Goerli:
+    // OffchainParkingDataResponse constant opdr = OffchainParkingDataResponse(0x5ecA6776c44E49753CB2910e2BFB0Ca2D756F62b);
 
 
 

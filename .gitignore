@@ -13,3 +13,5 @@ cache
 artifacts
 yarn-error.log
 deployments
+thegraph-query-smart-parking-dapp/
+smart-parking-dapp/

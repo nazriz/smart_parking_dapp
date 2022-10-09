@@ -3,6 +3,7 @@ pragma solidity ^0.8.7;
 
 import "./BokkyPooBahsDateTimeContract.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "hardhat/console.sol";
 
 interface ParkingSpotAttributes {
     function checkSpotAvailability(uint) external view returns (bool);
@@ -45,8 +46,9 @@ event EndActiveParkingSesion(uint256 tokenId);
     }
 
     struct TimeSlots {
-        uint256[] startTime;
-        uint256[] endTime; 
+        address walletAddress;
+        uint256 startTime;
+        uint256 endTime; 
     }
 
     DateTime current = DateTime(0,0,0,0,0,0);
@@ -58,16 +60,21 @@ event EndActiveParkingSesion(uint256 tokenId);
     mapping(address=>bool) public sessionInProgress;
     mapping(uint256=>uint256) public sessionCost;
     mapping(uint256=>TimeSlots) availableSlots;
+    uint256[] public activeSessions;
+    mapping(uint256=>TimeSlots[]) public reservedParkingTimes;
+    mapping(uint256=>TimeSlots[]) public tempReservedParkingTimes;
+
 
     uint256 public testLoop;
 
     AggregatorV3Interface internal ethUSDpriceFeed;
 
-    // ParkingSpotAttributes constant psa = ParkingSpotAttributes(0x5FC8d32690cc91D4c39d9d3abcBD16989F875707);
-    // ParkingSpotToken constant pst = ParkingSpotToken(0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9);
-
-    ParkingSpotAttributes constant psa = ParkingSpotAttributes(0x28E67485D20fFA78A7dC61CB4aAc07b82acc6382);
-    ParkingSpotToken constant pst = ParkingSpotToken(0x7380e28aB1F6ED032671b085390194F07aBC2606);
+    // //localhost:
+    ParkingSpotAttributes constant psa = ParkingSpotAttributes(0x5FC8d32690cc91D4c39d9d3abcBD16989F875707);
+    ParkingSpotToken constant pst = ParkingSpotToken(0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9);
+    // Goerli:
+    // ParkingSpotAttributes constant psa = ParkingSpotAttributes(0x0A0Bbb42636AB8C3516882519ADD39DF56dCc5A5);
+    // ParkingSpotToken constant pst = ParkingSpotToken(0x7380e28aB1F6ED032671b085390194F07aBC2606);
 
     // Payable address can receive Ether
     address payable public owner;
@@ -80,8 +87,10 @@ event EndActiveParkingSesion(uint256 tokenId);
 
     constructor() payable {
         owner = payable(msg.sender);
-        // ethUSDpriceFeed = AggregatorV3Interface(0x8A753747A1Fa494EC906cE90E9f37563A8AF630e);
-        ethUSDpriceFeed = AggregatorV3Interface(0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e);
+        //localhost
+        ethUSDpriceFeed = AggregatorV3Interface(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+        //goerli
+        // ethUSDpriceFeed = AggregatorV3Interface(0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e);
     }
 
     function deposit() public payable {
@@ -130,12 +139,16 @@ event EndActiveParkingSesion(uint256 tokenId);
         sessionInProgress[_address] = _status;
     }
 
-    function getStartTimeLength(uint256 _tokenId) public view returns (uint256) {
-        return availableSlots[_tokenId].startTime.length;
-    }
+    // function getStartTimeLength(uint256 _tokenId) public view returns (uint256) {
+    //     return availableSlots[_tokenId].startTime.length;
+    // }
 
-    function getEndTimeLength(uint256 _tokenId) public view returns (uint256) {
-        return availableSlots[_tokenId].endTime.length;
+    // function getEndTimeLength(uint256 _tokenId) public view returns (uint256) {
+    //     return availableSlots[_tokenId].endTime.length;
+    // }
+
+    function getReservedParkingTimes(uint256 _tokenId, uint256 _index) public view returns (address, uint256, uint256) {
+        return (reservedParkingTimes[_tokenId][_index].walletAddress,reservedParkingTimes[_tokenId][_index].startTime, reservedParkingTimes[_tokenId][_index].endTime );
     }
 
     function accountForTimezone(uint _unixTime, uint _tokenId) internal returns (uint256) {
@@ -193,28 +206,299 @@ event EndActiveParkingSesion(uint256 tokenId);
         requestedParkingTimes[_tokenId] = [requestedStartTimeUnix, requestedEndTimeUnix ];
         setSessionInProgress(msg.sender, true);
         sessionCost[_tokenId] = calculatedSessionCost;
+        activeSessions.push(_tokenId);
+
+       TimeSlots memory tempTimeSlot ;
+       tempTimeSlot.walletAddress = msg.sender;
+       tempTimeSlot.startTime = requestedStartTimeUnix;
+       tempTimeSlot.endTime = requestedEndTimeUnix;
+
+        reservedParkingTimes[_tokenId].push(tempTimeSlot);
+      
+
+
 
         emit ActiveParkingSesion(_tokenId, _requestedStartHour, _requestedStartMinute, _requestedEndHour, _requestedEndMinute);
     }
 
-    function checkAvailableSpots(uint256 _tokenId, uint256 _requestedStartTime, uint256 _requestedEndTime) public {
+    // function checkAvailableSpots(uint256 _tokenId, uint256 _requestedStartTime, uint256 _requestedEndTime) public {
         
-        uint256 [] memory spotStartTimes = availableSlots[_tokenId].startTime;
-        uint256 [] memory spotEndTimes = availableSlots[_tokenId].endTime;
+    //     uint256 [] memory spotStartTimes = availableSlots[_tokenId].startTime;
+    //     uint256 [] memory spotEndTimes = availableSlots[_tokenId].endTime;
 
-        uint256 startTimeLength = getStartTimeLength(_tokenId);
+    //     uint256 startTimeLength = getStartTimeLength(_tokenId);
 
-        for (uint i = 0; i < startTimeLength; i++) {
-            if (_requestedStartTime > spotEndTimes[i] && _requestedEndTime < spotStartTimes[i+1]) {
-                testLoop = 1111;
-            } else {
-                testLoop = 2222;
-            }
-        }
+    //     for (uint i = 0; i < startTimeLength; i++) {
+    //         if (_requestedStartTime > spotEndTimes[i] && _requestedEndTime < spotStartTimes[i+1]) {
+    //             testLoop = 1111;
+    //         } else {
+    //             testLoop = 2222;
+    //         }
+    //     }
+
+    // }
+
+    function slotInMiddleForOther(uint256 _tokenId, address caller, uint256 requestedStartTime, uint256 requestedEndTime, uint timeSlotsLength, uint _index) internal returns (bool) {
+                                delete tempReservedParkingTimes[_tokenId];
+
+                                console.log("index: %i", _index);
+
+                                TimeSlots memory tempTimeSlot;
+
+                                for (uint x = 0; x <= _index; x++) {
+                                tempTimeSlot.walletAddress = reservedParkingTimes[_tokenId][x].walletAddress;
+                                tempTimeSlot.startTime = reservedParkingTimes[_tokenId][x].startTime;
+                                tempTimeSlot.endTime = reservedParkingTimes[_tokenId][x].endTime;
+
+                                tempReservedParkingTimes[_tokenId].push(tempTimeSlot);
+
+                                }
+
+                        // uint [2] memory reservedParkingMapping0 = [tempReservedParkingTimes[_tokenId][0].startTime, tempReservedParkingTimes[_tokenId][0].endTime];
+                        // uint [2] memory reservedParkingMapping1 = [tempReservedParkingTimes[_tokenId][1].startTime, tempReservedParkingTimes[_tokenId][1].endTime];
+
+                        // console.log("tempReservedParkingTimesMapping at idx 0 startTime: %i endTime %i", reservedParkingMapping0[0],reservedParkingMapping0[1]);
+                        // console.log("tempReservedParkingTimesMapping at idx 1 startTime: %i endTime %i", reservedParkingMapping1[0],reservedParkingMapping1[1]);
+                                
+
+                                tempTimeSlot.walletAddress = caller;
+                                tempTimeSlot.startTime = requestedStartTime;
+                                tempTimeSlot.endTime = requestedEndTime;
+
+                                tempReservedParkingTimes[_tokenId].push(tempTimeSlot);
+
+                        // uint [2] memory reservedParkingMapping2 = [tempReservedParkingTimes[_tokenId][2].startTime, tempReservedParkingTimes[_tokenId][2].endTime];
+
+                        // console.log("tempReservedParkingTimesMapping at idx 2 startTime: %i endTime %i", reservedParkingMapping2[0],reservedParkingMapping0[1]);
+
+
+                                uint j = _index + 1;
+                                for (j; j < timeSlotsLength; j++ ) {
+                                
+                                tempTimeSlot.walletAddress = reservedParkingTimes[_tokenId][j].walletAddress;
+                                tempTimeSlot.startTime = reservedParkingTimes[_tokenId][j].startTime;
+                                tempTimeSlot.endTime = reservedParkingTimes[_tokenId][j].endTime;
+                                tempReservedParkingTimes[_tokenId].push(tempTimeSlot);
+
+                                 }
+
+                        // uint [2] memory reservedParkingMapping3 = [tempReservedParkingTimes[_tokenId][3].startTime, tempReservedParkingTimes[_tokenId][3].endTime];
+                        // uint [2] memory reservedParkingMapping4 = [tempReservedParkingTimes[_tokenId][4].startTime, tempReservedParkingTimes[_tokenId][4].endTime];
+
+                        // console.log("tempReservedParkingTimesMapping at idx 3 startTime: %i endTime %i", reservedParkingMapping3[0],reservedParkingMapping3[1]);
+                        // console.log("tempReservedParkingTimesMapping at idx 4 startTime: %i endTime %i", reservedParkingMapping4[0],reservedParkingMapping4[1]);
+                                 
+
+                                reservedParkingTimes[_tokenId] = tempReservedParkingTimes[_tokenId];
+                                return true;
 
     }
 
-    function reserveParkingSpotToken(uint256 _tokenId, uint256 _requestedStartFromCurrentDateSeconds, uint8 _requestedStartHour, uint8 _requestedStartMinute, uint8 _requestedEndHour, uint8 _requestedEndMinute, uint256 _requestedEndFromCurrentDateSeconds) public {
+    function slotInMiddleForZero(uint256 _tokenId, address caller, uint256 requestedStartTime, uint256 requestedEndTime, uint timeSlotsLength) internal returns (bool) {
+                                delete tempReservedParkingTimes[_tokenId];
+
+                                TimeSlots memory tempTimeSlot;
+                                 
+                                tempTimeSlot.walletAddress = reservedParkingTimes[_tokenId][0].walletAddress;
+                                tempTimeSlot.startTime = reservedParkingTimes[_tokenId][0].startTime;
+                                tempTimeSlot.endTime = reservedParkingTimes[_tokenId][0].endTime;
+
+                                tempReservedParkingTimes[_tokenId].push(tempTimeSlot);
+
+                                tempTimeSlot.walletAddress = caller;
+                                tempTimeSlot.startTime = requestedStartTime;
+                                tempTimeSlot.endTime = requestedEndTime;
+
+                                tempReservedParkingTimes[_tokenId].push(tempTimeSlot);
+
+                                
+                                for (uint j = 1; j < timeSlotsLength; j++ ) {
+                                
+                                tempTimeSlot.walletAddress = reservedParkingTimes[_tokenId][j].walletAddress;
+                                tempTimeSlot.startTime = reservedParkingTimes[_tokenId][j].startTime;
+                                tempTimeSlot.endTime = reservedParkingTimes[_tokenId][j].endTime;
+                                tempReservedParkingTimes[_tokenId].push(tempTimeSlot);
+
+                                 }
+
+                                reservedParkingTimes[_tokenId] = tempReservedParkingTimes[_tokenId];
+                                return true;
+
+    }
+
+
+    function slotTimeSlotinMiddle(uint256 _tokenId, address caller, uint256 requestedStartTime, uint256 requestedEndTime, uint timeSlotsLength) internal returns (bool) {
+                uint i = 0;
+                // uint currentIdxPlusOne = 0;
+            console.log("timeslotslength: %i, i: %i", timeSlotsLength, i);
+            for (i; i < timeSlotsLength; i++) {
+            console.log(" in loop timeslotslength: %i, i: %i", timeSlotsLength, i);
+                    uint overflowCheck = i;
+                    overflowCheck++;
+                        console.log(" in loop ++ timeslotslength: %i, i: %i, overflowcheck: %i", timeSlotsLength, i, overflowCheck);
+                        uint reservedEndTime = reservedParkingTimes[_tokenId][i].endTime;
+                        uint reservedStartTime = reservedParkingTimes[_tokenId][overflowCheck].startTime;
+                        
+                        // console.log("before first if statement (line 250): requestedStartTime: %i, reservedParkingTimes[i]endTime: %i, requestedEndTime: %i, reservedParkingTimes[i+1]startTime: %i",requestedStartTime, reservedEndTime, requestedEndTime,  reservedStartTime  );
+                        console.log("before first if statement (line 250): requestedStartTime: %i, requestedEndTime: %i",requestedStartTime, requestedEndTime );
+                        console.log("before first if statement (line 250): reservedEndTime: %i, reservedStartTime: %i",reservedEndTime, reservedStartTime );
+
+                        // currentIdxPlusOne = i+1;
+                        uint [2] memory reservedParkingMapping0 = [reservedParkingTimes[_tokenId][0].startTime, reservedParkingTimes[_tokenId][0].endTime];
+                        uint [2] memory reservedParkingMapping1 = [reservedParkingTimes[_tokenId][1].startTime, reservedParkingTimes[_tokenId][1].endTime];
+
+                        console.log("reservedParkingMapping at idx 0 startTime: %i endTime %i", reservedParkingMapping0[0],reservedParkingMapping0[1]);
+                        console.log("reservedParkingMapping at idx 1 startTime: %i endTime %i", reservedParkingMapping1[0],reservedParkingMapping1[1]);
+                        console.log("i: %i", i);
+
+                     if (requestedStartTime > reservedParkingTimes[_tokenId][i].endTime) {
+                        console.log("overflow check: %i, timeSlotsLength: %i", overflowCheck, timeSlotsLength);
+                        console.log("i: %i", i);
+
+                        if (overflowCheck > timeSlotsLength) {
+                        revert("append to the end fam");
+                        } else {
+                            if(requestedEndTime < reservedParkingTimes[_tokenId][overflowCheck].startTime) {
+                                if  (i == 0) {
+                                 slotInMiddleForZero(_tokenId, caller, requestedStartTime, requestedEndTime, timeSlotsLength);
+                                 return true;
+                            } else if (i > 0) {
+                                slotInMiddleForOther(_tokenId, caller, requestedStartTime, requestedEndTime, timeSlotsLength, i);
+                                return true;
+                            } else {
+                                revert("something went wrong");
+                            }
+
+
+
+                                
+                            }
+
+                            continue;
+                        }
+
+                            console.log("i: %i", i);
+
+                            continue;
+                 } else if (requestedStartTime > reservedParkingTimes[_tokenId][i].endTime && i++ > timeSlotsLength ) {
+                        revert("append to the end fam");
+                 } else {
+                    revert("idk mayn");
+                 } 
+
+                        
+                 
+                 revert("If ur reading this, it means ur on to something");
+
+            }
+
+            revert("down here man");
+
+  
+
+
+     }
+
+
+    // function slotTimeSlotinMiddle(uint256 _tokenId, address caller, uint256 requestedStartTime, uint256 requestedEndTime, uint timeSlotsLength) internal {
+    //                     uint i = 0;
+    //                 for (i; i < timeSlotsLength; i++) {
+    //             if (reservedParkingTimes[_tokenId][i].endTime < requestedStartTime) {
+
+    //                 if (i+1 >= timeSlotsLength) {
+    //                     revert("got em");
+    //             // TimeSlots memory tempTimeSlot;
+    //             // tempTimeSlot.walletAddress = caller;
+    //             // tempTimeSlot.startTime = requestedStartTime;
+    //             // tempTimeSlot.endTime = requestedEndTime;
+    //             // reservedParkingTimes[_tokenId].push(tempTimeSlot);
+    //                 } else if (reservedParkingTimes[_tokenId][i+1].startTime > requestedEndTime) {
+    //                     delete tempReservedParkingTimes[_tokenId];
+                    
+    //                 // int tempTimeSlotsArrayLength = int(timeSlotsLength)+1;
+    //                 TimeSlots memory tempTimeSlot ;
+
+    //                 tempTimeSlot.walletAddress = caller;
+    //                 tempTimeSlot.startTime = requestedStartTime;
+    //                 tempTimeSlot.endTime = requestedEndTime;
+
+    //                 if  (i == 0) {
+
+    //                 TimeSlots memory holderTimeSlot;
+                    
+    //                 holderTimeSlot.walletAddress = reservedParkingTimes[_tokenId][i].walletAddress;
+    //                 holderTimeSlot.startTime = reservedParkingTimes[_tokenId][i].startTime;
+    //                 holderTimeSlot.endTime = reservedParkingTimes[_tokenId][i].endTime;
+                    
+    //                 tempReservedParkingTimes[_tokenId].push(tempTimeSlot);
+
+    //                 uint j = i+1;
+    //                 for (j; j < timeSlotsLength; j++ ) {
+    //                 TimeSlots memory holderTimeSlot;
+                    
+    //                 holderTimeSlot.walletAddress = reservedParkingTimes[_tokenId][j].walletAddress;
+    //                 holderTimeSlot.startTime = reservedParkingTimes[_tokenId][j].startTime;
+    //                 holderTimeSlot.endTime = reservedParkingTimes[_tokenId][j].endTime;
+    //                 }
+
+
+ 
+    //                 } else {
+    //                     revert("no bueno");
+    //                 }
+
+    //                 // for (uint x = 0; x <= i; x++) {
+    //                 // TimeSlots memory holderTimeSlot;
+                    
+    //                 // holderTimeSlot.walletAddress = reservedParkingTimes[_tokenId][x].walletAddress;
+    //                 // holderTimeSlot.startTime = reservedParkingTimes[_tokenId][x].startTime;
+    //                 // holderTimeSlot.endTime = reservedParkingTimes[_tokenId][x].endTime;
+
+    //                 //     tempReservedParkingTimes[_tokenId].push(holderTimeSlot);
+
+    //                 // }
+
+    //                 //     tempReservedParkingTimes[_tokenId].push(tempTimeSlot);
+
+    //                 //     uint y = i+1;
+
+    //                 //   for (y; y <= timeSlotsLength; y++) {
+
+    //                 //     TimeSlots memory holderTimeSlot;
+                    
+    //                 // holderTimeSlot.walletAddress = reservedParkingTimes[_tokenId][y].walletAddress;
+    //                 // holderTimeSlot.startTime = reservedParkingTimes[_tokenId][y].startTime;
+    //                 // holderTimeSlot.endTime = reservedParkingTimes[_tokenId][y].endTime;
+    //                 //     // tempTimeSlotArray.push(reservedParkingTimes[_tokenId][y]);
+    //                 //     tempReservedParkingTimes[_tokenId].push(holderTimeSlot);
+    //                 // }
+
+    //                 // reservedParkingTimes[_tokenId] = tempReservedParkingTimes[_tokenId];
+
+    //                 } else {
+
+    //             // TimeSlots memory tempTimeSlot ;
+    //             // tempTimeSlot.walletAddress = caller;
+    //             // tempTimeSlot.startTime = requestedStartTime;
+    //             // tempTimeSlot.endTime = requestedEndTime;
+    //             // reservedParkingTimes[_tokenId].push(tempTimeSlot);
+
+    //             revert("teehee");
+                        
+    //                 }
+    //             } 
+    //             else {
+    //                 revert("Nah bruh");
+    //             }
+
+
+    //         }
+
+    //         revert("I be flossin'");
+
+    // }
+
+    function reserveParkingSpotToken(uint256 _tokenId, uint8 _requestedStartHour, uint8 _requestedStartMinute, uint8 _requestedEndHour, uint8 _requestedEndMinute) public {
         require(_requestedStartHour <= 23, "Start hour must be between 0 and 23");
         require(_requestedStartMinute <= 59, "Start minute must be between 0 and 59");
         require(_requestedEndHour <= 23, "End hour must be between 0 and 23");
@@ -224,18 +508,32 @@ event EndActiveParkingSesion(uint256 tokenId);
         uint256 requestedStartTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedStartHour,_requestedStartMinute), _tokenId);
         uint256 requestedEndTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedEndHour,_requestedEndMinute), _tokenId);
 
-        requestedStartTimeUnix += _requestedStartFromCurrentDateSeconds;
-        requestedEndTimeUnix += _requestedEndFromCurrentDateSeconds;
+        // requestedStartTimeUnix += _requestedStartFromCurrentDateSeconds;
+        // requestedEndTimeUnix += _requestedEndFromCurrentDateSeconds;
 
-        parkingSpotStartTime += _requestedStartFromCurrentDateSeconds;
-        parkingSpotEndTime += _requestedEndFromCurrentDateSeconds;
+        uint timeSlotsLength = reservedParkingTimes[_tokenId].length;
 
-        require(requestedStartTimeUnix >= parkingSpotStartTime && parkingSpotEndTime <= parkingSpotEndTime);
+        if (timeSlotsLength == 0) {
 
+        TimeSlots memory tempTimeSlot ;
+        tempTimeSlot.walletAddress = msg.sender;
+        tempTimeSlot.startTime = requestedStartTimeUnix;
+        tempTimeSlot.endTime = requestedEndTimeUnix;
+        reservedParkingTimes[_tokenId].push(tempTimeSlot);
 
-        // uint256 arrayLength = getAvailableSlotsLength(_tokenId);
-
-        // for (x = 1)
+        } else if (timeSlotsLength == 1) {
+            if (reservedParkingTimes[_tokenId][0].endTime < requestedStartTimeUnix) {
+                TimeSlots memory tempTimeSlot ;
+                tempTimeSlot.walletAddress = msg.sender;
+                tempTimeSlot.startTime = requestedStartTimeUnix;
+                tempTimeSlot.endTime = requestedEndTimeUnix;
+                reservedParkingTimes[_tokenId].push(tempTimeSlot);
+            } else {
+                revert("Time Slot unavailable, please try again");
+            }
+        } else {
+            slotTimeSlotinMiddle(_tokenId, msg.sender, requestedStartTimeUnix, requestedEndTimeUnix, timeSlotsLength);
+        }
 
     }
 
@@ -288,6 +586,30 @@ function getLatestPrice() public view returns (int) {
         ) = ethUSDpriceFeed.latestRoundData();
         return price;
     }
+
+function removeActiveSession(uint _index) public {
+        require(_index < activeSessions.length, "index out of bound");
+
+        for (uint i = _index; i < activeSessions.length - 1; i++) {
+            activeSessions[i] = activeSessions[i + 1];
+        }
+        activeSessions.pop();
+    }
+
+    function checkIfParkingSessionOver() external {
+        for (uint i = 0; i < activeSessions.length; i++) {
+        uint256 parkingEndtimeUnix = requestedParkingTimes[activeSessions[i]][1];
+
+        if (block.timestamp > parkingEndtimeUnix) {
+            returnParkingSpotToken(activeSessions[i]);
+            removeActiveSession(i);
+        }
+
+
+        }
+
+    }
+
 
 }
 

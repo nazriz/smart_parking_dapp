@@ -1,6 +1,6 @@
 const { assert, expect } = require("chai");
 const { network, deployments, ethers } = require("hardhat");
-const { developmentChains } = require("../../helper-hardhat-config");
+const { developmentChains } = require("../helper-hardhat-config");
 const { numToBytes32 } = require("@chainlink/test-helpers/dist/src/helpers");
 
 !developmentChains.includes(network.name)
