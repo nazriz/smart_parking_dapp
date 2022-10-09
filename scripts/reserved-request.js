@@ -7,7 +7,7 @@ const { deployer } = getNamedAccounts();
 
 async function main() {
   const provider = ethers.provider;
-  const [addr1, addr2, addr3, addr4, addr5] = await ethers.getSigners();
+  const [addr1, addr2, addr3, addr4, addr5, addr6, addr7, addr8, addr9, addr10] = await ethers.getSigners();
   const offchain = await (
     await ethers.getContractFactory("contracts/OffchainParkingDataResponse.sol:OffchainParkingDataResponse")
   ).attach("0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9");
@@ -31,7 +31,7 @@ async function main() {
   await token.mintParkingSpot(addr1.address, 0);
   await attributes.setSpotAvailability(1, 1);
   await attributes.setPricePerHour(1, 5);
-  await attributes.connect(addr1).setSpotPermittedParkingTime(1, 09, 00, 23, 00);
+  await attributes.connect(addr1).setSpotPermittedParkingTime(1, 00, 01, 23, 59);
   await token.connect(addr1).setApprovalForRequestContract(1, "0x0165878A594ca255338adfa4d48449f69242Eb8F", true);
   await attributes.setParkingSpotTimezone(1, 1, 11);
 
@@ -40,12 +40,18 @@ async function main() {
   await requestSpot.connect(addr3).deposit({ value: ethers.utils.parseUnits("0.03", "ether") });
   await requestSpot.connect(addr4).deposit({ value: ethers.utils.parseUnits("0.03", "ether") });
   await requestSpot.connect(addr5).deposit({ value: ethers.utils.parseUnits("0.03", "ether") });
+  await requestSpot.connect(addr6).deposit({ value: ethers.utils.parseUnits("0.03", "ether") });
+
+  await requestSpot.connect(addr7).deposit({ value: ethers.utils.parseUnits("0.03", "ether") });
+  await requestSpot.connect(addr8).deposit({ value: ethers.utils.parseUnits("0.03", "ether") });
+  await requestSpot.connect(addr9).deposit({ value: ethers.utils.parseUnits("0.03", "ether") });
+  await requestSpot.connect(addr10).deposit({ value: ethers.utils.parseUnits("0.03", "ether") });
 
   // console.log("requesting token...");
   // await requestSpot.connect(addr2).requestParkingSpotToken(1, 22, 15, 22, 30);
 
   console.log("reserving spot from addr2:");
-  await requestSpot.connect(addr2).reserveParkingSpotToken(1, 01, 00, 01, 59);
+  await requestSpot.connect(addr2).reserveParkingSpotToken(1, 02, 00, 02, 29);
   console.log("reserved times mapping:");
   console.log(await requestSpot.getReservedParkingTimes(1, 0));
 
@@ -69,6 +75,34 @@ async function main() {
   console.log(await requestSpot.getReservedParkingTimes(1, 1));
   console.log(await requestSpot.getReservedParkingTimes(1, 2));
   console.log(await requestSpot.getReservedParkingTimes(1, 3));
+
+  await requestSpot.connect(addr6).reserveParkingSpotToken(1, 05, 00, 05, 30);
+
+  console.log("reserving spot from addr6:");
+
+  console.log(await requestSpot.getReservedParkingTimes(1, 0));
+  console.log(await requestSpot.getReservedParkingTimes(1, 1));
+  console.log(await requestSpot.getReservedParkingTimes(1, 2));
+  console.log(await requestSpot.getReservedParkingTimes(1, 3));
+  console.log(await requestSpot.getReservedParkingTimes(1, 4));
+
+  // await requestSpot.connect(addr7).reserveParkingSpotToken(1, 01, 30, 01, 59);
+  await requestSpot.connect(addr8).reserveParkingSpotToken(1, 12, 59, 13, 59);
+  await requestSpot.connect(addr9).reserveParkingSpotToken(1, 03, 31, 3, 59);
+  await requestSpot.connect(addr10).reserveParkingSpotToken(1, 04, 00, 04, 29);
+
+  console.log("after 7 8 9 10");
+
+  console.log(await requestSpot.getReservedParkingTimes(1, 0));
+  console.log(await requestSpot.getReservedParkingTimes(1, 1));
+  console.log(await requestSpot.getReservedParkingTimes(1, 2));
+  console.log(await requestSpot.getReservedParkingTimes(1, 3));
+  console.log(await requestSpot.getReservedParkingTimes(1, 4));
+
+  console.log(await requestSpot.getReservedParkingTimes(1, 5));
+  console.log(await requestSpot.getReservedParkingTimes(1, 6));
+  console.log(await requestSpot.getReservedParkingTimes(1, 7));
+  // console.log(await requestSpot.getReservedParkingTimes(1, 8));
 
   console.log("checking owner...");
   console.log(await token.ownerOf(1));
