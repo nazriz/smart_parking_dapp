@@ -15,3 +15,5 @@ yarn-error.log
 deployments
 thegraph-query-smart-parking-dapp/
 smart-parking-dapp/
+gasReport.txt
+gasReport.csv
