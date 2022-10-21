@@ -20,6 +20,8 @@ contract ParkingSpotToken is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
+    uint256 public tokenCount;
+
     constructor() ERC721("ParkingSpotToken", "PST") public {
     }
 
@@ -73,6 +75,7 @@ contract ParkingSpotToken is ERC721URIStorage {
         string memory tokenURI = prepareData(_index);
 
         uint256 newItemId = _tokenIds.current();
+        tokenCount = _tokenIds.current();
         _mint(user, newItemId);
         _setTokenURI(newItemId, tokenURI);
 
@@ -90,6 +93,10 @@ contract ParkingSpotToken is ERC721URIStorage {
     function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual override returns (bool) {
         address owner = ERC721.ownerOf(tokenId);
         return (spender == owner || isApprovedForAll(owner, spender) || getApproved(tokenId) == spender) || isApprovedForRequestContract(tokenId, spender);
+    }
+
+    function getTokenCount() external returns (uint256) {
+        return tokenCount;
     }
     
 }

@@ -80,8 +80,11 @@ module.exports = {
   },
   gasReporter: {
     enabled: true,
-    // outputFile: "./gasReport.csv",
+    // outputFile: "./gasReport.txt",
     gasPriceApi: ETHERSCAN_API_KEY,
     coinmarketcap: "564aa464-cc3e-493b-a10e-f4df3336f9ea",
+  },
+  mocha: {
+    timeout: 100000000,
   },
 };

@@ -4,6 +4,8 @@ pragma solidity ^0.8.7;
 import "./BokkyPooBahsDateTimeContract.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "hardhat/console.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+
 
 interface ParkingSpotAttributes {
     function checkSpotAvailability(uint) external view returns (bool);
@@ -22,7 +24,8 @@ interface ParkingSpotToken {
     function safeTransferFromWithOwnerApprovals(address,address,uint256) external;
     function _parkingSpotOwners(uint) external view returns (address);
     function paymentAddress(uint) external view returns (address);
-
+    function getTokenCount() external view returns (uint256);
+ 
 }
 
 
@@ -63,10 +66,11 @@ event EndActiveParkingSesion(uint256 tokenId);
     uint256[] public activeSessions;
     mapping(uint256=>TimeSlots[]) public reservedParkingTimes;
     mapping(uint256=>TimeSlots[]) public tempReservedParkingTimes;
+    mapping(address=>bytes32) public hashedVehicleRegistration;
+    mapping(uint256=>address) public spotLastUsedBy;
 
 
-    uint256 public testLoop;
-
+    bytes public testHashPayload;
     AggregatorV3Interface internal ethUSDpriceFeed;
 
     // //localhost:
@@ -123,6 +127,7 @@ event EndActiveParkingSesion(uint256 tokenId);
 
         uint permittedStartTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(permittedStartHour, permittedStartMinute), _tokenId);
         uint permittedEndTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(permittedEndHour, permittedEndMinute), _tokenId);
+
         // permittedStartTimeUnix = accountForTimezone(permittedStartTimeUnix, _tokenId);
         // permittedEndTimeUnix  =  accountForTimezone(permittedEndTimeUnix, _tokenId);
 
@@ -167,7 +172,7 @@ event EndActiveParkingSesion(uint256 tokenId);
     }
 
 
-    function calculateSessionCost(uint256 _tokenId, uint256 _startTimeUnix, uint256 _endTimeUnix) public returns (uint256)  {
+    function calculateSessionCost(uint256 _tokenId, uint256 _startTimeUnix, uint256 _endTimeUnix) public returns (uint256) {
         uint256 hourlyRateUSD = (psa.pricePerHour(_tokenId) * (10**8));
         int256 ethUSDPrice = getLatestPrice();
         uint256 hourlyRateGwei = (1000000000000000000 / (uint256(ethUSDPrice) / hourlyRateUSD));   
@@ -175,48 +180,49 @@ event EndActiveParkingSesion(uint256 tokenId);
 
         uint256 duration = (_endTimeUnix - _startTimeUnix);
 
+
         emit EstimatedSessionCost(_tokenId, duration * gweiBySecond);
 
         return duration * gweiBySecond;
     }
 
-    function requestParkingSpotToken(uint256 _tokenId, uint8 _requestedStartHour, uint8 _requestedStartMinute, uint8 _requestedEndHour, uint8 _requestedEndMinute) public {
-        require(_requestedStartHour <= 23, "Start hour must be between 0 and 23");
-        require(_requestedStartMinute <= 59, "Start minute must be between 0 and 59");
-        require(_requestedEndHour <= 23, "End hour must be between 0 and 23");
-        require(_requestedEndMinute <= 59, "End minute must be between 0 and 59");
-        require(psa.spotInUse(_tokenId) == false, "Parking spot currently in use!");
+    // function requestParkingSpotToken(uint256 _tokenId, uint8 _requestedStartHour, uint8 _requestedStartMinute, uint8 _requestedEndHour, uint8 _requestedEndMinute) public {
+    //     require(_requestedStartHour <= 23, "Start hour must be between 0 and 23");
+    //     require(_requestedStartMinute <= 59, "Start minute must be between 0 and 59");
+    //     require(_requestedEndHour <= 23, "End hour must be between 0 and 23");
+    //     require(_requestedEndMinute <= 59, "End minute must be between 0 and 59");
+    //     require(psa.spotInUse(_tokenId) == false, "Parking spot currently in use!");
 
-        (uint256 parkingSpotStartTime, uint256 parkingSpotEndTime) = retrievePermittedParkingTimes(_tokenId);
+    //     (uint256 parkingSpotStartTime, uint256 parkingSpotEndTime) = retrievePermittedParkingTimes(_tokenId);
 
-        uint256 requestedStartTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedStartHour,_requestedStartMinute), _tokenId);
-        uint256 requestedEndTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedEndHour,_requestedEndMinute), _tokenId);
-        // require(requestedStartTimeUnix > block.timestamp, "Can't request parking spot in the past!");
-        // require(depositors[msg.sender] >= 1000000000000000000, "Must deposit at least 1 Eth");
-        require(depositors[msg.sender] >= 10000000000000000, "Must deposit at least 0.01 Eth");
-        uint256 calculatedSessionCost = calculateSessionCost(_tokenId,requestedStartTimeUnix,requestedEndTimeUnix);
-        require(depositors[msg.sender] >= calculatedSessionCost , "You don't have enough ETH deposited to pay for your requested duration!" );
-        require(psa.checkSpotAvailability(_tokenId) == true, "Parking spot is unavailable!");
-        require(requestedStartTimeUnix > parkingSpotStartTime && requestedEndTimeUnix < parkingSpotEndTime , "Parking spot unavailable at this time!");
+    //     uint256 requestedStartTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedStartHour,_requestedStartMinute), _tokenId);
+    //     uint256 requestedEndTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedEndHour,_requestedEndMinute), _tokenId);
+    //     // require(requestedStartTimeUnix > block.timestamp, "Can't request parking spot in the past!");
+    //     // require(depositors[msg.sender] >= 1000000000000000000, "Must deposit at least 1 Eth");
+    //     require(depositors[msg.sender] >= 10000000000000000, "Must deposit at least 0.01 Eth");
+    //     uint256 calculatedSessionCost = calculateSessionCost(_tokenId,requestedStartTimeUnix,requestedEndTimeUnix);
+    //     require(depositors[msg.sender] >= calculatedSessionCost , "You don't have enough ETH deposited to pay for your requested duration!" );
+    // //     require(psa.checkSpotAvailability(_tokenId) == true, "Parking spot is unavailable!");
+    //     require(requestedStartTimeUnix > parkingSpotStartTime && requestedEndTimeUnix < parkingSpotEndTime , "Parking spot unavailable at this time!");
 
-       address currentOwner = pst.ownerOf(_tokenId);
-        currentParkingSpotOwner[_tokenId] = currentOwner;
-        pst.safeTransferFrom(currentOwner, msg.sender, _tokenId);
-        psa.setSpotInUse(_tokenId, true);
-        requestedParkingTimes[_tokenId] = [requestedStartTimeUnix, requestedEndTimeUnix ];
-        setSessionInProgress(msg.sender, true);
-        sessionCost[_tokenId] = calculatedSessionCost;
-        activeSessions.push(_tokenId);
+    //    address currentOwner = pst.ownerOf(_tokenId);
+    //     currentParkingSpotOwner[_tokenId] = currentOwner;
+    //     pst.safeTransferFrom(currentOwner, msg.sender, _tokenId);
+    //     psa.setSpotInUse(_tokenId, true);
+    //     requestedParkingTimes[_tokenId] = [requestedStartTimeUnix, requestedEndTimeUnix ];
+    //     setSessionInProgress(msg.sender, true);
+    //     sessionCost[_tokenId] = calculatedSessionCost;
+    //     activeSessions.push(_tokenId);
 
-       TimeSlots memory tempTimeSlot ;
-       tempTimeSlot.walletAddress = msg.sender;
-       tempTimeSlot.startTime = requestedStartTimeUnix;
-       tempTimeSlot.endTime = requestedEndTimeUnix;
+    //    TimeSlots memory tempTimeSlot ;
+    //    tempTimeSlot.walletAddress = msg.sender;
+    //    tempTimeSlot.startTime = requestedStartTimeUnix;
+    //    tempTimeSlot.endTime = requestedEndTimeUnix;
 
-        reservedParkingTimes[_tokenId].push(tempTimeSlot);
+    //     reservedParkingTimes[_tokenId].push(tempTimeSlot);
     
-        emit ActiveParkingSesion(_tokenId, _requestedStartHour, _requestedStartMinute, _requestedEndHour, _requestedEndMinute);
-    }
+    //     emit ActiveParkingSesion(_tokenId, _requestedStartHour, _requestedStartMinute, _requestedEndHour, _requestedEndMinute);
+    // }
 
 
 
@@ -375,7 +381,8 @@ event EndActiveParkingSesion(uint256 tokenId);
         require(_requestedStartMinute <= 59, "Start minute must be between 0 and 59");
         require(_requestedEndHour <= 23, "End hour must be between 0 and 23");
         require(_requestedEndMinute <= 59, "End minute must be between 0 and 59");
-     
+        require(depositors[msg.sender] >= 10000000000000000, "Must deposit at least 0.01 Eth");
+
         (uint256 parkingSpotStartTime, uint256 parkingSpotEndTime) = retrievePermittedParkingTimes(_tokenId);
         uint256 requestedStartTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedStartHour,_requestedStartMinute), _tokenId);
         uint256 requestedEndTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedEndHour,_requestedEndMinute), _tokenId);
@@ -389,9 +396,6 @@ event EndActiveParkingSesion(uint256 tokenId);
         }
 
     
-
-        console.log("timeSlotsLength: %i, lastIndex: %i", timeSlotsLength, lastIndex);
-
         if (timeSlotsLength == 0) {
 
         tempTimeSlot.walletAddress = msg.sender;
@@ -402,11 +406,6 @@ event EndActiveParkingSesion(uint256 tokenId);
 
 
         } else if (timeSlotsLength == 1) {
-
-            // if (requestedEndTimeUnix > reservedParkingTimes[_tokenId][0].startTime) {
-            //     addTimeSlotToStart(_tokenId, msg.sender, requestedStartTimeUnix, requestedEndTimeUnix, timeSlotsLength);
-            // }
-
             if (requestedStartTimeUnix > reservedParkingTimes[_tokenId][lastIndex].endTime) {
                 addTimeSlotToEnd(_tokenId, msg.sender, requestedStartTimeUnix, requestedEndTimeUnix);
                 return true;
@@ -424,11 +423,6 @@ event EndActiveParkingSesion(uint256 tokenId);
                 revert("Time Slot unavailable, please try again");
             }
         } else {
-
-            // if (requestedEndTimeUnix > reservedParkingTimes[_tokenId][0].startTime) {
-            //     addTimeSlotToStart(_tokenId, msg.sender, requestedStartTimeUnix, requestedEndTimeUnix, timeSlotsLength);
-            // }
-
             if (requestedStartTimeUnix > reservedParkingTimes[_tokenId][lastIndex].endTime) {
                 addTimeSlotToEnd(_tokenId, msg.sender, requestedStartTimeUnix, requestedEndTimeUnix);
                 return true;
@@ -436,9 +430,8 @@ event EndActiveParkingSesion(uint256 tokenId);
             slotTimeSlotinMiddle(_tokenId, msg.sender, requestedStartTimeUnix, requestedEndTimeUnix, timeSlotsLength);
             return true;
         }
-        
-
     }
+
 
 
     // function endParkingSession(uint256 _tokenId) public returns (bool) {
@@ -446,38 +439,38 @@ event EndActiveParkingSesion(uint256 tokenId);
 
     // }
 
-    function returnParkingSpotToken(uint256 _tokenId) public returns (bool) {
+    // function returnParkingSpotToken(uint256 _tokenId) public returns (bool) {
 
-        uint256 parkingEndtimeUnix = requestedParkingTimes[_tokenId][1];
+    //     uint256 parkingEndtimeUnix = requestedParkingTimes[_tokenId][1];
 
-        if (block.timestamp >= parkingEndtimeUnix) {
-            address currentUser = pst.ownerOf(_tokenId);
-                pst.safeTransferFrom(currentUser, pst._parkingSpotOwners(_tokenId), _tokenId);
-                psa.setSpotInUse(_tokenId, false);
-                setSessionInProgress(currentUser, false);
-                depositors[currentUser] -= sessionCost[_tokenId];
-                payable(pst.paymentAddress(_tokenId)).transfer(sessionCost[_tokenId]);
-                return true;
-            } else {
-                revert("Session is not over!");
-                
-    //         } 
-    //     } else if (parkingEndtimeUnix == 0) {
-    //             address currentUser = pst.ownerOf(_tokenId);
-    //             pst.safeTransferFrom(currentUser, parkingSpotOwner[_tokenId], _tokenId);
+    //     if (block.timestamp >= parkingEndtimeUnix) {
+    //         address currentUser = pst.ownerOf(_tokenId);
+    //             pst.safeTransferFrom(currentUser, pst._parkingSpotOwners(_tokenId), _tokenId);
     //             psa.setSpotInUse(_tokenId, false);
+    //             setSessionInProgress(currentUser, false);
+    //             depositors[currentUser] -= sessionCost[_tokenId];
+    //             payable(pst.paymentAddress(_tokenId)).transfer(sessionCost[_tokenId]);
     //             return true;
     //         } else {
-    //             revert("Session has is not over!");
-    // }
+    //             revert("Session is not over!");
+                
+    // //         } 
+    // //     } else if (parkingEndtimeUnix == 0) {
+    // //             address currentUser = pst.ownerOf(_tokenId);
+    // //             pst.safeTransferFrom(currentUser, parkingSpotOwner[_tokenId], _tokenId);
+    // //             psa.setSpotInUse(_tokenId, false);
+    // //             return true;
+    // //         } else {
+    // //             revert("Session has is not over!");
+    // // }
 
-        revert("Session is not over!");
+    //     revert("Session is not over!");
 
-            }
+    //         }
 
-    emit EndActiveParkingSesion(_tokenId);
+    // emit EndActiveParkingSesion(_tokenId);
 
-}
+// }
 
 function getLatestPrice() public view returns (int) {
         (
@@ -490,28 +483,170 @@ function getLatestPrice() public view returns (int) {
         return price;
     }
 
-function removeActiveSession(uint _index) public {
-        require(_index < activeSessions.length, "index out of bound");
+// function removeActiveSession(uint _index) public {
+//         require(_index < activeSessions.length, "index out of bound");
 
-        for (uint i = _index; i < activeSessions.length - 1; i++) {
-            activeSessions[i] = activeSessions[i + 1];
+//         for (uint i = _index; i < activeSessions.length - 1; i++) {
+//             activeSessions[i] = activeSessions[i + 1];
+//         }
+//         activeSessions.pop();
+//     }
+
+//     function checkIfParkingSessionOver() external {
+//         for (uint i = 0; i < activeSessions.length; i++) {
+//         uint256 parkingEndtimeUnix = requestedParkingTimes[activeSessions[i]][1];
+
+//         if (block.timestamp > parkingEndtimeUnix) {
+//             returnParkingSpotToken(activeSessions[i]);
+//             removeActiveSession(i);
+//         }
+
+
+//         }
+
+//     }
+
+    function distributeParkingSpots() external {
+        uint256 tokenCount = pst.getTokenCount();
+
+        for (uint x = 1; x <= tokenCount; x ++) {
+            for (uint y=0; y < reservedParkingTimes[x].length; y++ ) {
+                
+                // start of new session
+                if (reservedParkingTimes[x][y].startTime < block.timestamp) {
+
+                    if (!(pst.ownerOf(x) == pst._parkingSpotOwners(x))) {
+                    endParkingSession(x);
+
+                    if (!(y+1 > reservedParkingTimes[x].length)) {
+                    uint timeToNextUser =  (block.timestamp % reservedParkingTimes[x][y+1].startTime);
+                    if (timeToNextUser > 300 ) {
+                     pst.safeTransferFrom(pst.ownerOf(x), pst._parkingSpotOwners(x), x);
+                    } else {
+                    address nextUser = reservedParkingTimes[x][y+1].walletAddress;
+                    uint256 nextStartTime = reservedParkingTimes[x][y+1].startTime;
+                    uint256 nextEndTime = reservedParkingTimes[x][y+1].endTime;
+
+                    startParkingSession(x, nextUser,nextStartTime,nextEndTime);
+                    pst.safeTransferFrom(pst.ownerOf(x), nextUser, x);
+
+                    removeOldReservation(x, y);
+
+                    }
+
+                } else {
+                    pst.safeTransferFrom(pst.ownerOf(x), pst._parkingSpotOwners(x), x);
+
+                }
+
+
+                } else {
+                    address nextUser = reservedParkingTimes[x][y].walletAddress;
+                    uint256 nextStartTime = reservedParkingTimes[x][y].startTime;
+                    uint256 nextEndTime = reservedParkingTimes[x][y].endTime;
+
+                    startParkingSession(x, nextUser,nextStartTime,nextEndTime);
+                    pst.safeTransferFrom(pst.ownerOf(x), nextUser, x);
+
+                    removeOldReservation(x, y);
+
+                }
+
+                   } 
+
+
+
+                // end of present session
+                if ( block.timestamp > reservedParkingTimes[x][y].endTime) {
+                    
+                endParkingSession(x);
+
+                // transfer token back to owner
+                pst.safeTransferFrom(pst.ownerOf(x), pst._parkingSpotOwners(x), x);
+
+
+                }
+
+
+            }
+            
+
+
         }
-        activeSessions.pop();
+
     }
 
-    function checkIfParkingSessionOver() external {
-        for (uint i = 0; i < activeSessions.length; i++) {
-        uint256 parkingEndtimeUnix = requestedParkingTimes[activeSessions[i]][1];
+    function endParkingSession(uint256 _tokenId) internal {
 
-        if (block.timestamp > parkingEndtimeUnix) {
-            returnParkingSpotToken(activeSessions[i]);
-            removeActiveSession(i);
-        }
-
-
-        }
+        // charges user and updates mappings
+        address currentUser = pst.ownerOf(_tokenId);
+        address tokenOwner = pst._parkingSpotOwners(_tokenId);
+        psa.setSpotInUse(_tokenId, false);
+        setSessionInProgress(currentUser, false);
+        depositors[currentUser] -= sessionCost[_tokenId];
+        depositors[tokenOwner] += sessionCost[_tokenId];
+        spotLastUsedBy[_tokenId] = currentUser;
 
     }
+
+    function startParkingSession(uint256 _tokenId, address _currentUser, uint256 _startTime, uint256 _endTime) internal {
+
+        psa.setSpotInUse(_tokenId, true);
+        setSessionInProgress(_currentUser, true);
+        sessionCost[_tokenId] = calculateSessionCost(_tokenId, _startTime, _endTime);
+        activeSessions.push(_tokenId);
+
+    }
+
+    function removeOldReservation(uint256 _tokenId, uint256 _index) internal {
+        delete tempReservedParkingTimes[_tokenId];
+
+        TimeSlots memory tempTimeSlot ;
+
+
+            uint i = _index;
+            i = i + 1;
+        for (i; i < reservedParkingTimes[_tokenId].length; i++ ) {
+        
+        tempTimeSlot.walletAddress = reservedParkingTimes[_tokenId][i].walletAddress;
+        tempTimeSlot.startTime = reservedParkingTimes[_tokenId][i].startTime;
+        tempTimeSlot.endTime = reservedParkingTimes[_tokenId][i].endTime;
+        tempReservedParkingTimes[_tokenId].push(tempTimeSlot);
+
+            }
+
+        reservedParkingTimes[_tokenId] = tempReservedParkingTimes[_tokenId];
+
+    }
+
+    function reportParkingSpotOveruse(uint256 _tokenId, bytes memory registrationNumber ) public {
+
+        string memory addressString = Strings.toHexString(uint160(spotLastUsedBy[_tokenId]), 20);
+        bytes memory addressBytes = bytes(addressString);
+        
+        bytes memory hashPayload =  bytes.concat(addressBytes,registrationNumber);
+
+        testHashPayload = hashPayload;
+
+
+        // bytes32 hashToCheck = sha256(hashPayload);
+
+        // if (hashPayload == hashedVehicleRegistration[spotLastUsedBy[_tokenId]]) {
+        //     revert("Spot overused!!!");
+        // }
+
+
+    }
+
+    function setVehicleRegistrationHash(bytes32 _hash) external {
+        hashedVehicleRegistration[msg.sender] = _hash;
+    }
+
+    function checkVehicleRegistrationHash(address _address) internal returns (bool) {
+        if (!(hashedVehicleRegistration[_address] == 0)) {
+            return true;
+        }
+    } 
 
 
 }
