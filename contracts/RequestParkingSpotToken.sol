@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: MIT
+///SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
 import "./BokkyPooBahsDateTimeContract.sol";
@@ -29,16 +29,28 @@ interface ParkingSpotToken {
 }
 
 
-
+//// @title RequestParkingSpotToken
+//// @author Nazim Rizvic
+//// @notice Allows for users to reseve parking spot tokens. Facilitates
+//// @notice  the movement of tokens between users using off-chain automation
 contract RequestParkingSpotToken {
 using BokkyPooBahsDateTimeLibrary for *;
 
+////@param user address of depositor, amount amount in ETH
 event EthDeposit(address user, uint256 amount);
+////@param user address of withdrawal, amount amount in ETH
 event EthWithdraw(address user, uint256 amount);
+////@param tokenId the id of the parking spot token, cost the
+////@param cost of the session in gwei/second * session duration in seconds
 event EstimatedSessionCost(uint256 tokenId, uint256 cost);
+////@param tokenId id of parking spot available startHour/EndHour 0 - 23, startMinute/endMinute 0 - 59
 event ActiveParkingSesion(uint256 tokenId, uint8 requestedStartHour, uint8 requestedStartMinute, uint8 requestedEndHour, uint8 requestedEndMinute);
+////@param tokenId the id of the parking spot token,
 event EndActiveParkingSesion(uint256 tokenId);
 
+
+////@dev used for holding times temporarily between 
+////@dev time converesions initilise with all values to zero
     struct DateTime {
         uint256 Year;
         uint256 Month; 
@@ -48,17 +60,20 @@ event EndActiveParkingSesion(uint256 tokenId);
         uint256 Second;
     }
 
+////@dev used as a data structure for holding reserved 
+////@dev parking times, in an array of TimeSlots
     struct TimeSlots {
         address walletAddress;
         uint256 startTime;
         uint256 endTime; 
     }
 
+
+    /// Initilaise DateTime once, then use as required
     DateTime current = DateTime(0,0,0,0,0,0);
 
     mapping(address=>uint256) public depositors;
     mapping(uint256=> address) public currentParkingSpotOwner;
-    // mapping(uint256=>uint256[2]) public permittedParkingTimes;
     mapping(uint256=>uint256[2]) public requestedParkingTimes;
     mapping(address=>bool) public sessionInProgress;
     mapping(uint256=>uint256) public sessionCost;
@@ -70,38 +85,35 @@ event EndActiveParkingSesion(uint256 tokenId);
     mapping(uint256=>address) public spotLastUsedBy;
 
 
-    bytes public testHashPayload;
     AggregatorV3Interface internal ethUSDpriceFeed;
 
-    // //localhost:
+    /// ///localhost:
     ParkingSpotAttributes constant psa = ParkingSpotAttributes(0x5FC8d32690cc91D4c39d9d3abcBD16989F875707);
     ParkingSpotToken constant pst = ParkingSpotToken(0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9);
-    // Goerli:
-    // ParkingSpotAttributes constant psa = ParkingSpotAttributes(0x0A0Bbb42636AB8C3516882519ADD39DF56dCc5A5);
-    // ParkingSpotToken constant pst = ParkingSpotToken(0x7380e28aB1F6ED032671b085390194F07aBC2606);
+    /// Goerli:
+    /// ParkingSpotAttributes constant psa = ParkingSpotAttributes(0x0A0Bbb42636AB8C3516882519ADD39DF56dCc5A5);
+    /// ParkingSpotToken constant pst = ParkingSpotToken(0x7380e28aB1F6ED032671b085390194F07aBC2606);
 
-    // Payable address can receive Ether
+    /// Payable address can receive Ether
     address payable public owner;
-
-    // Payable constructor can receive Ether
-    // constructor() payable {
-    //     owner = payable(msg.sender);
-    //     ethUSDpriceFeed = AggregatorV3Interface(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
-    // }
 
     constructor() payable {
         owner = payable(msg.sender);
-        //localhost
+        ///localhost
         ethUSDpriceFeed = AggregatorV3Interface(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
-        //goerli
-        // ethUSDpriceFeed = AggregatorV3Interface(0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e);
+        ///goerli
+        /// ethUSDpriceFeed = AggregatorV3Interface(0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e);
     }
 
+
+////@dev Allows for deposits in ether to the contract
     function deposit() public payable {
         depositors[msg.sender] += msg.value;
         emit EthDeposit(msg.sender, msg.value);
     }
 
+////@dev Allows for ether withdrawals
+////@param _amount the amount to withdraw in ether
     function withdraw(uint256 _amount) public {
         require(_amount <= depositors[msg.sender], "Not enough ETH deposited");
         depositors[msg.sender] -= _amount;
@@ -112,27 +124,30 @@ event EndActiveParkingSesion(uint256 tokenId);
 
     }
     
+////@dev Converts current timestamp in Unix to datetime
+////@dev e.g. 1666315186 > 21/10/2022 01:19:46
     function getCurrentDateTime () internal {
         (current.Year, current.Month, current.Day, current.Hour, current.Minute, current.Second) = BokkyPooBahsDateTimeLibrary.timestampToDateTime(block.timestamp);
     }
 
+////@dev Converts arbitrary time to Unix time for the 
+////@dev date in which function is called e.g. 10:30 > 1666308646
     function genericTimeFrameToCurrentUnixTime(uint8 _hour, uint8 _minute) internal returns (uint) {
         getCurrentDateTime();
        return BokkyPooBahsDateTimeLibrary.timestampFromDateTime(current.Year, current.Month, current.Day, _hour, _minute, 0);
     }
 
+///@dev Checks permittedParkingTime in ParkingSpotAttributes for the 
+///@dev the times specified by true parking spot owner for parking
+////@dev spot to be in use, and then converts these times into current
+////@dev Unix time. e.g. 09:00 to 17:00 > 1666303200 to 1666332000
+////@param _tokenId the id of the parking spot token
     function retrievePermittedParkingTimes(uint _tokenId) internal returns (uint256, uint256) {
         (uint8 permittedStartHour, uint8 permittedStartMinute) = psa.checkSpotPermittedParkingStartTime(_tokenId);
         (uint8 permittedEndHour, uint8 permittedEndMinute) = psa.checkSpotPermittedParkingEndTime(_tokenId);
 
         uint permittedStartTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(permittedStartHour, permittedStartMinute), _tokenId);
         uint permittedEndTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(permittedEndHour, permittedEndMinute), _tokenId);
-
-        // permittedStartTimeUnix = accountForTimezone(permittedStartTimeUnix, _tokenId);
-        // permittedEndTimeUnix  =  accountForTimezone(permittedEndTimeUnix, _tokenId);
-
-        // permittedParkingTimes[_tokenId] = [permittedStartTimeUnix, permittedEndTimeUnix];
-
         return (permittedStartTimeUnix, permittedEndTimeUnix);
     }
 
@@ -144,18 +159,11 @@ event EndActiveParkingSesion(uint256 tokenId);
         sessionInProgress[_address] = _status;
     }
 
-    // function getStartTimeLength(uint256 _tokenId) public view returns (uint256) {
-    //     return availableSlots[_tokenId].startTime.length;
-    // }
-
-    // function getEndTimeLength(uint256 _tokenId) public view returns (uint256) {
-    //     return availableSlots[_tokenId].endTime.length;
-    // }
-
-    function getReservedParkingTimes(uint256 _tokenId, uint256 _index) public view returns (address, uint256, uint256) {
-        return (reservedParkingTimes[_tokenId][_index].walletAddress,reservedParkingTimes[_tokenId][_index].startTime, reservedParkingTimes[_tokenId][_index].endTime );
-    }
-
+////@dev Used after time conversions have occurred, and accounts for
+////@dev the timezone of the designated parking spot. Adds or substracts
+////@dev in increments of 3600 (1 hour), depending on the timezone value
+////@dev present in ParkingSpotAttributes
+///@param _unixTime time to be converted, in Unix _tokenId the id of the parking spot token
     function accountForTimezone(uint _unixTime, uint _tokenId) internal returns (uint256) {
         uint8[2] memory timezoneAttributes  = (psa.checkParkingSpotTimezone(_tokenId));    
         uint256 offset = (timezoneAttributes[1] * 3600);
@@ -171,7 +179,14 @@ event EndActiveParkingSesion(uint256 tokenId);
 
     }
 
-
+////@dev Calculates the cost of a parking session, based 
+////@dev  on the dollar/hour price specified in ParkingSpotAttributes
+////@dev requires external pricefeed for ETH/USD. 
+////@dev Chainlink feed used in current implementation. 
+////@dev Converts dollar/hour rate to gwei/second, and then
+////@dev multiplies this value by the session duratuon in seconds
+///@param  _tokenId the id of the parking spot token, _startTimeUnix the starting time of
+///@param  the session in Unix format, _endTimeUnix the end time of the session in Unix format
     function calculateSessionCost(uint256 _tokenId, uint256 _startTimeUnix, uint256 _endTimeUnix) public returns (uint256) {
         uint256 hourlyRateUSD = (psa.pricePerHour(_tokenId) * (10**8));
         int256 ethUSDPrice = getLatestPrice();
@@ -186,45 +201,13 @@ event EndActiveParkingSesion(uint256 tokenId);
         return duration * gweiBySecond;
     }
 
-    // function requestParkingSpotToken(uint256 _tokenId, uint8 _requestedStartHour, uint8 _requestedStartMinute, uint8 _requestedEndHour, uint8 _requestedEndMinute) public {
-    //     require(_requestedStartHour <= 23, "Start hour must be between 0 and 23");
-    //     require(_requestedStartMinute <= 59, "Start minute must be between 0 and 59");
-    //     require(_requestedEndHour <= 23, "End hour must be between 0 and 23");
-    //     require(_requestedEndMinute <= 59, "End minute must be between 0 and 59");
-    //     require(psa.spotInUse(_tokenId) == false, "Parking spot currently in use!");
 
-    //     (uint256 parkingSpotStartTime, uint256 parkingSpotEndTime) = retrievePermittedParkingTimes(_tokenId);
-
-    //     uint256 requestedStartTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedStartHour,_requestedStartMinute), _tokenId);
-    //     uint256 requestedEndTimeUnix = accountForTimezone(genericTimeFrameToCurrentUnixTime(_requestedEndHour,_requestedEndMinute), _tokenId);
-    //     // require(requestedStartTimeUnix > block.timestamp, "Can't request parking spot in the past!");
-    //     // require(depositors[msg.sender] >= 1000000000000000000, "Must deposit at least 1 Eth");
-    //     require(depositors[msg.sender] >= 10000000000000000, "Must deposit at least 0.01 Eth");
-    //     uint256 calculatedSessionCost = calculateSessionCost(_tokenId,requestedStartTimeUnix,requestedEndTimeUnix);
-    //     require(depositors[msg.sender] >= calculatedSessionCost , "You don't have enough ETH deposited to pay for your requested duration!" );
-    // //     require(psa.checkSpotAvailability(_tokenId) == true, "Parking spot is unavailable!");
-    //     require(requestedStartTimeUnix > parkingSpotStartTime && requestedEndTimeUnix < parkingSpotEndTime , "Parking spot unavailable at this time!");
-
-    //    address currentOwner = pst.ownerOf(_tokenId);
-    //     currentParkingSpotOwner[_tokenId] = currentOwner;
-    //     pst.safeTransferFrom(currentOwner, msg.sender, _tokenId);
-    //     psa.setSpotInUse(_tokenId, true);
-    //     requestedParkingTimes[_tokenId] = [requestedStartTimeUnix, requestedEndTimeUnix ];
-    //     setSessionInProgress(msg.sender, true);
-    //     sessionCost[_tokenId] = calculatedSessionCost;
-    //     activeSessions.push(_tokenId);
-
-    //    TimeSlots memory tempTimeSlot ;
-    //    tempTimeSlot.walletAddress = msg.sender;
-    //    tempTimeSlot.startTime = requestedStartTimeUnix;
-    //    tempTimeSlot.endTime = requestedEndTimeUnix;
-
-    //     reservedParkingTimes[_tokenId].push(tempTimeSlot);
-    
-    //     emit ActiveParkingSesion(_tokenId, _requestedStartHour, _requestedStartMinute, _requestedEndHour, _requestedEndMinute);
-    // }
-
-
+////@dev Slots a parking spot reservation into the middle of the storage array
+///@param   _tokenId the id of the parking spot token, caller the address of the user
+///@param   making the reservation, requestedStartTime/requestedEndTime the start and
+///@param   end times of the reservation in Unix format, timeSlotsLength the 
+///@param   current length of the storage array, _index the index that the new 
+///@param   reservation will be placed into
 
     function slotInMiddleForOther(uint256 _tokenId, address caller, uint256 requestedStartTime, uint256 requestedEndTime, uint timeSlotsLength, uint _index) internal returns (bool) {
                                 delete tempReservedParkingTimes[_tokenId];
@@ -261,6 +244,13 @@ event EndActiveParkingSesion(uint256 tokenId);
 
     }
 
+////@dev Slots a parking spot reservation into the middle of the storage array
+///@param   _tokenId the id of the parking spot token, caller the address of the user
+///@param   making the reservation, requestedStartTime/requestedEndTime the start and
+///@param   end times of the reservation in Unix format, timeSlotsLength the 
+///@param   current length of the storage array, _index the index that the new 
+///@param   reservation will be placed into
+
     function slotInMiddleForZero(uint256 _tokenId, address caller, uint256 requestedStartTime, uint256 requestedEndTime, uint timeSlotsLength) internal returns (bool) {
                                 delete tempReservedParkingTimes[_tokenId];
 
@@ -293,6 +283,12 @@ event EndActiveParkingSesion(uint256 tokenId);
 
     }
 
+////@dev Slots a parking spot reservation into the middle of the storage array
+///@param   _tokenId the id of the parking spot token, caller the address of the user
+///@param   making the reservation, requestedStartTime/requestedEndTime the start and
+///@param   end times of the reservation in Unix format, timeSlotsLength the 
+///@param   current length of the storage array, _index the index that the new 
+///@param   reservation will be placed into
 
     function slotTimeSlotinMiddle(uint256 _tokenId, address caller, uint256 requestedStartTime, uint256 requestedEndTime, uint timeSlotsLength) internal returns (bool) {
                 uint i = 0;
@@ -337,6 +333,10 @@ event EndActiveParkingSesion(uint256 tokenId);
 
      }
 
+////@dev Slots a parking spot reservation to the end of the storage array
+////@param   _tokenId the id of the parking spot token, caller the address of the user
+////@param   making the reservation, requestedStartTime/requestedEndTime the start and
+////@param   end times of the reservation in Unix format
      function addTimeSlotToEnd(uint256 _tokenId, address caller, uint256 requestedStartTime, uint256 requestedEndTime) internal returns (bool) {
 
         TimeSlots memory tempTimeSlot;
@@ -349,6 +349,11 @@ event EndActiveParkingSesion(uint256 tokenId);
 
      }
 
+////@dev Adds a parking spot reservation to the start of the storage array
+///@param  _tokenId the id of the parking spot token, caller the address of the user
+///@param   making the reservation, requestedStartTime/requestedEndTime the start and
+///@param   end times of the reservation in Unix format timeSlotsLength the 
+///@param   current length of the storage array,
      function addTimeSlotToStart(uint256 _tokenId, address caller, uint256 requestedStartTime, uint256 requestedEndTime, uint256 timeSlotsLength) internal returns (bool) {
 
                                 delete tempReservedParkingTimes[_tokenId];
@@ -376,6 +381,13 @@ event EndActiveParkingSesion(uint256 tokenId);
 
      }
 
+
+ 
+  ////@dev Allows a user to reserve a parking spot, assuming their request
+  ////@dev does not revert the transaction by falling outside the allowed params.
+
+////@param  _tokenId the id of the parking spot token, caller the address of the user
+////@param   making the reservation,  _requestedStartHour/_requestedEndHour 0 - 23, _requestedStartMinute/_requestedEndMinute 0 - 59
     function reserveParkingSpotToken(uint256 _tokenId, uint8 _requestedStartHour, uint8 _requestedStartMinute, uint8 _requestedEndHour, uint8 _requestedEndMinute) public returns (bool) {
         require(_requestedStartHour <= 23, "Start hour must be between 0 and 23");
         require(_requestedStartMinute <= 59, "Start minute must be between 0 and 59");
@@ -432,46 +444,7 @@ event EndActiveParkingSesion(uint256 tokenId);
         }
     }
 
-
-
-    // function endParkingSession(uint256 _tokenId) public returns (bool) {
-    //     require(msg.sender == pst.ownerOf(_tokenId);)
-
-    // }
-
-    // function returnParkingSpotToken(uint256 _tokenId) public returns (bool) {
-
-    //     uint256 parkingEndtimeUnix = requestedParkingTimes[_tokenId][1];
-
-    //     if (block.timestamp >= parkingEndtimeUnix) {
-    //         address currentUser = pst.ownerOf(_tokenId);
-    //             pst.safeTransferFrom(currentUser, pst._parkingSpotOwners(_tokenId), _tokenId);
-    //             psa.setSpotInUse(_tokenId, false);
-    //             setSessionInProgress(currentUser, false);
-    //             depositors[currentUser] -= sessionCost[_tokenId];
-    //             payable(pst.paymentAddress(_tokenId)).transfer(sessionCost[_tokenId]);
-    //             return true;
-    //         } else {
-    //             revert("Session is not over!");
-                
-    // //         } 
-    // //     } else if (parkingEndtimeUnix == 0) {
-    // //             address currentUser = pst.ownerOf(_tokenId);
-    // //             pst.safeTransferFrom(currentUser, parkingSpotOwner[_tokenId], _tokenId);
-    // //             psa.setSpotInUse(_tokenId, false);
-    // //             return true;
-    // //         } else {
-    // //             revert("Session has is not over!");
-    // // }
-
-    //     revert("Session is not over!");
-
-    //         }
-
-    // emit EndActiveParkingSesion(_tokenId);
-
-// }
-
+///@dev used to interact with Chainlink pricefeed
 function getLatestPrice() public view returns (int) {
         (
             /*uint80 roundID*/,
@@ -483,28 +456,13 @@ function getLatestPrice() public view returns (int) {
         return price;
     }
 
-// function removeActiveSession(uint _index) public {
-//         require(_index < activeSessions.length, "index out of bound");
-
-//         for (uint i = _index; i < activeSessions.length - 1; i++) {
-//             activeSessions[i] = activeSessions[i + 1];
-//         }
-//         activeSessions.pop();
-//     }
-
-//     function checkIfParkingSessionOver() external {
-//         for (uint i = 0; i < activeSessions.length; i++) {
-//         uint256 parkingEndtimeUnix = requestedParkingTimes[activeSessions[i]][1];
-
-//         if (block.timestamp > parkingEndtimeUnix) {
-//             returnParkingSpotToken(activeSessions[i]);
-//             removeActiveSession(i);
-//         }
 
 
-//         }
-
-//     }
+///@dev function called by off-chain automaation solution to distrbute
+///@dev parking spots between users as the parking spot sessions commence
+///@dev and conclude. WARNING: Function does NOT reasonably scale past
+///@dev a few dozens parking spots, before becoming practically unusable
+///@dev For demonstration purposes only. Use at own risk. 
 
     function distributeParkingSpots() external {
         uint256 tokenCount = pst.getTokenCount();
@@ -512,7 +470,7 @@ function getLatestPrice() public view returns (int) {
         for (uint x = 1; x <= tokenCount; x ++) {
             for (uint y=0; y < reservedParkingTimes[x].length; y++ ) {
                 
-                // start of new session
+                /// start of new session
                 if (reservedParkingTimes[x][y].startTime < block.timestamp) {
 
                     if (!(pst.ownerOf(x) == pst._parkingSpotOwners(x))) {
@@ -556,12 +514,12 @@ function getLatestPrice() public view returns (int) {
 
 
 
-                // end of present session
+                /// end of present session
                 if ( block.timestamp > reservedParkingTimes[x][y].endTime) {
                     
                 endParkingSession(x);
 
-                // transfer token back to owner
+                /// transfer token back to owner
                 pst.safeTransferFrom(pst.ownerOf(x), pst._parkingSpotOwners(x), x);
 
 
@@ -578,7 +536,7 @@ function getLatestPrice() public view returns (int) {
 
     function endParkingSession(uint256 _tokenId) internal {
 
-        // charges user and updates mappings
+        /// charges user and updates mappings
         address currentUser = pst.ownerOf(_tokenId);
         address tokenOwner = pst._parkingSpotOwners(_tokenId);
         psa.setSpotInUse(_tokenId, false);
@@ -619,6 +577,10 @@ function getLatestPrice() public view returns (int) {
 
     }
 
+
+///@dev allows a user to make a dispute during a parking session
+///@dev Experimental. Not tested for safety. Treat with caution. 
+
     function reportParkingSpotOveruse(uint256 _tokenId, bytes memory registrationNumber ) public {
 
         string memory addressString = Strings.toHexString(uint160(spotLastUsedBy[_tokenId]), 20);
@@ -629,11 +591,11 @@ function getLatestPrice() public view returns (int) {
         testHashPayload = hashPayload;
 
 
-        // bytes32 hashToCheck = sha256(hashPayload);
+        bytes32 hashToCheck = sha256(hashPayload);
 
-        // if (hashPayload == hashedVehicleRegistration[spotLastUsedBy[_tokenId]]) {
-        //     revert("Spot overused!!!");
-        // }
+        if (hashPayload == hashedVehicleRegistration[spotLastUsedBy[_tokenId]]) {
+            revert("Spot overused!!!");
+        }
 
 
     }
@@ -650,4 +612,12 @@ function getLatestPrice() public view returns (int) {
 
 
 }
+
+function getReservedParkingTimes(uint256 _tokenId, uint256 _index) public view returns (address, uint256, uint256) {
+        return (reservedParkingTimes[_tokenId][_index].walletAddress,reservedParkingTimes[_tokenId][_index].startTime, reservedParkingTimes[_tokenId][_index].endTime );
+    }
+
+
+
+
 

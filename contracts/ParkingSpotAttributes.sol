@@ -7,13 +7,23 @@ interface ParkingSpotToken {
 }
 
 
+/// @title ParkingSpotAttributes
+/// @author Nazim Rizvic.
+/// @notice Allows for setting various designated attributes to a parking spot token
 contract ParkingSpotAttributes {
 
+
+    ///@param tokenId id of parking spot available is availability
     event ParkingSpotAvailable(uint256 tokenId, bool available);
+    ///@param tokenId id of parking spot inUse toggled as true if parking spot session active
     event ParkingSpotInUse(uint256 tokenId, bool inUse);
+    ///@param tokenId id of parking spot available startHour/EndHour 0 - 23, startMinute/endMinute 0 - 59
     event ParkingSpotPermittedTime(uint256 tokenId, uint8 startHour, uint8 startMinute, uint8 endHour, uint8 endMinute);
+    ///@param tokenId id of parking spot pricePerHour amount in USD. e.g. 5.5
     event ParkingSpotPricePerHour(uint256 tokenId, uint256 pricePerHour);
 
+///@dev used for holding times in storage, referred to during conversions
+///@dev initilise with all values to zero
 struct availabilityTimes {
     uint8 startHour;
     uint8 startMinute; 
@@ -21,14 +31,12 @@ struct availabilityTimes {
     uint8 endMinute;
 }
 
+
 mapping(uint => bool) public spot_available;
 mapping(uint=> availabilityTimes) public permittedParkingTime;
 mapping(uint=> uint8[2]) public parkingSpotTimeZone;
 mapping(uint256=>bool) public spotInUse;
 mapping(uint256=>uint256) public pricePerHour;
-
-// Need to make this only owner
-address requestParkingSpotTokenAddress;
 
 // Interface address is for local network, must be updated for network deployed to.
 ParkingSpotToken constant pst = ParkingSpotToken(0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9);
@@ -36,11 +44,16 @@ ParkingSpotToken constant pst = ParkingSpotToken(0xDc64a140Aa3E981100a9becA4E685
 // ParkingSpotToken constant pst = ParkingSpotToken(0x7380e28aB1F6ED032671b085390194F07aBC2606);
 
 
-
+///@dev returns address of token operator
+///@param _parking_spot_id the id of the token
 function isApprovedOrOwner(uint _parking_spot_id) internal view returns (bool) {
         return pst.ownerOf(_parking_spot_id) == msg.sender;
     }
 
+///@dev Allows the true owner of the parking spot to 
+///@dev toggle the availability of the parking spot. 
+///@dev true owner is verified against parkingSpotOwners mapping in ParkingSpotToken Contract
+///@param _parking_spot_id the id of the token, availability is bool
 function setSpotAvailability(uint _parking_spot_id, bool _availability) external {
     require(isApprovedOrOwner(_parking_spot_id), "Not approved to update parking spot Availability"); 
     spot_available[_parking_spot_id] = _availability;
@@ -48,6 +61,12 @@ function setSpotAvailability(uint _parking_spot_id, bool _availability) external
     emit ParkingSpotAvailable(_parking_spot_id, _availability);
 }
 
+
+
+///@dev Allows the true owner of the parking spot to 
+///@dev set the  the times in which the parking spot can be requested for use by user
+///@dev true owner is verified against parkingSpotOwners mapping in ParkingSpotToken Contract
+///@param _parking_spot_id the id of the token, startHour/EndHour 0 - 23, startMinute/endMinute 0 - 59
 function setSpotPermittedParkingTime(uint _parking_spot_id, uint8 _start_hour, uint8 _start_minute, uint8 _end_hour, uint8 _end_minute) external {
     require(_start_hour <= 23, "Start hour must be between 0 and 23");
     require(_start_minute <= 59, "Start minute must be between 0 and 59");
@@ -59,6 +78,12 @@ function setSpotPermittedParkingTime(uint _parking_spot_id, uint8 _start_hour, u
     emit ParkingSpotPermittedTime( _parking_spot_id,  _start_hour,  _start_minute,  _end_hour,  _end_minute);
 }
 
+
+///@dev Allows the true owner of the parking spot to 
+///@dev set the  the timezone in which the parking spot operates.
+///@dev true owner is verified against parkingSpotOwners mapping in ParkingSpotToken Contract
+///@param _parking_spot_id the id of the token, _isNegative 0 for no, 1 for yes. Denotes whether or not 
+///@param the timezone is + or - GMT. _timezone is GMT timezone value * 3600, e.g. GMT 10:00 = 36000
 function setParkingSpotTimezone(uint _parking_spot_id, uint8 _isNegative, uint8 _timezone) external {
     require(_timezone <= 14 && _isNegative == 0 || _timezone <= 11 && _isNegative == 1 , "Please input a valid timezone");
     parkingSpotTimeZone[_parking_spot_id] = [_isNegative, _timezone];
@@ -70,12 +95,12 @@ function setSpotInUse(uint _tokenId, bool _inUse) external {
     emit ParkingSpotInUse(_tokenId, _inUse);
 }
 
-//make this only owner
-function setRequestParkingSpotTokenAddress (address _requestParkingSpotTokenAddress) public {
-    requestParkingSpotTokenAddress = _requestParkingSpotTokenAddress;
-}
 
-//make this only owner
+///@dev Allows the true owner of the parking spot to 
+///@dev set the  the timezone in which the parking spot operates.
+///@dev true owner is verified against parkingSpotOwners mapping in ParkingSpotToken Contract
+///@param _parking_spot_id the id of the token, _isNegative 0 for no, 1 for yes. Denotes whether or not 
+///@param the timezone is + or - GMT. _timezone is GMT timezone value * 3600, e.g. GMT 10:00 = 36000
 function setPricePerHour (uint256 _tokenId, uint256 _pricePerHour) public {
     pricePerHour[_tokenId] = _pricePerHour;
     emit ParkingSpotPricePerHour(_tokenId, _pricePerHour);
