@@ -8,7 +8,7 @@ interface ParkingSpotToken {
 
 
 /// @title ParkingSpotAttributes
-/// @author Nazim Rizvic.
+/// @author XXXXX XXXXXX.
 /// @notice Allows for setting various designated attributes to a parking spot token
 contract ParkingSpotAttributes {
 
