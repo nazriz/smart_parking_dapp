@@ -30,7 +30,7 @@ interface ParkingSpotToken {
 
 
 //// @title RequestParkingSpotToken
-//// @author Nazim Rizvic
+//// @author XXXXX XXXXXX
 //// @notice Allows for users to reseve parking spot tokens. Facilitates
 //// @notice  the movement of tokens between users using off-chain automation
 contract RequestParkingSpotToken {
