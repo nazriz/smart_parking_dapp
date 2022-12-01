@@ -11,7 +11,7 @@ interface OffchainParkingDataResponse {
 }
 
 /// @title ParkingSpotToken
-/// @author Nazim Rizvic
+/// @author XXXXX XXXXXX
 /// @notice Allows for the minting of a parking spot token. Requires OffchainParkingDataResponse.
 contract ParkingSpotToken is ERC721URIStorage {
 
