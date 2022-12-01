@@ -6,7 +6,7 @@ import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 /// @title OffChainParkingDataResponse
-/// @author Chainlink Labs. Modified by Nazim Rizvic.
+/// @author Chainlink Labs. Modified by XXXXX XXXXXX.
 /// @notice Pulls data from a trusted database, and brings on-chain using (local) chainlink node
 contract OffchainParkingDataResponse is ChainlinkClient, ConfirmedOwner {
     using Chainlink for Chainlink.Request;
